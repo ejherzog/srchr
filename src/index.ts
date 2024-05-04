@@ -5,7 +5,7 @@ import bodyParser from "body-parser";
 import { fileURLToPath } from 'url';
 import cookieParser from "cookie-parser";
 import { authenticate, getTokenCookie, userLogin } from "./middleware/token";
-import { getUserDisplayName } from "./spotify/client";
+import { getUserDisplayName, getUserPlaylists } from "./spotify/client";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,7 +20,9 @@ app.use(cors());
 app.use(cookieParser());
 
 app.get('/', async (req: Request, res: Response) => {
-    res.render('index');
+    res.render('index', {
+        name: await nameIfLoggedIn(req)
+    });
 });
 
 app.get('/login', (req: Request, res: Response) => {
@@ -31,15 +33,30 @@ app.get('/auth', async (req: Request, res: Response) => {
     await authenticate(req, res);
 });
 
-app.get('/logged_in', async (req: Request, res: Response) => {
-    const displayName = await getUserDisplayName(getTokenCookie(req));
-    res.render('logged_in', {
-        name: displayName
+// app.get('/logged_in', async (req: Request, res: Response) => {
+//     const token = getTokenCookie(req);
+//     const displayName = await getUserDisplayName(token);
+//     const playlistData = await getUserPlaylists(token);
+//     console.log(playlistData);
+//     res.render('logged_in', {
+//         name: displayName
+//     });
+// });
+
+app.get('/playlists', async (req: Request, res: Response) => {
+    const token = getTokenCookie(req);
+    const displayName = await getUserDisplayName(token);
+    const playlistData = await getUserPlaylists(token);
+    res.render('playlists', {
+        name: displayName,
+        playlists: playlistData
     });
 });
 
-app.get('/about', (req: Request, res: Response) => {
-    res.render('about');
+app.get('/about', async (req: Request, res: Response) => {
+    res.render('about', {
+        name: await nameIfLoggedIn(req)
+    });
 });
 
 app.use(express.static(__dirname + '/public'));
@@ -47,3 +64,13 @@ app.use(express.static(__dirname + '/public'));
 app.listen(process.env.PORT, () => {
     console.log(`[server]: Server is running at http://localhost:${process.env.PORT}`);
 });
+
+async function nameIfLoggedIn(req: Request) {
+
+    var token = req.cookies['user-token'];
+    if (token) {
+        return await getUserDisplayName(token);
+    } else {
+        return undefined;
+    }
+}

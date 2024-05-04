@@ -36,3 +36,23 @@ export async function getUserDisplayName(token: string) {
 
     return userResponse['display_name'];
 }
+
+export async function getUserPlaylists(token: string) {
+
+    const playlistResponse: any = await ky.get('https://api.spotify.com/v1/me/playlists', {
+        headers: { 'Authorization': `Bearer ${token}`}
+    }).json();
+
+    const rawData: any[] = playlistResponse['items'];
+    const playlists: any[] = [];
+
+    rawData.forEach(item => {
+        playlists.push({
+            name: item.name,
+            trackCount: item.tracks.total,
+            description: item.description
+        })
+    });
+
+    return playlists;
+}

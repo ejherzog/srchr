@@ -25,10 +25,9 @@ export function getTokenCookie(req: Request) {
 
 export function userLogin(req: Request, res: Response) {
 
-    console.log(req.cookies);
     if (req.cookies['user-token'] === undefined) {
         var state = uuidv4();
-        var scope = 'user-read-private user-read-email';
+        var scope = 'user-read-private user-read-email playlist-read-private';
     
         res.redirect('https://accounts.spotify.com/authorize?' +
         querystring.stringify({
@@ -51,7 +50,7 @@ export async function authenticate(req: Request, res: Response) {
         const code = req.query.code as string;
         const accessToken = await getAccessToken(code);
         setCookie(res, accessToken.token, accessToken.expires_in);
-        res.redirect('/logged_in');
+        res.redirect('/playlists');
     } else {
         res.redirect('/about');
     }

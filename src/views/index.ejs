@@ -1,13 +1,19 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
   <%- include('./partials/_head'); %>
   <body>
     <%- include('./partials/_nav'); %>
     <div class="container mt-2">
-      <hr>
-      <hr>
-      <hr>
-      <%- include('./partials/_footer'); %>
+        <section>
+        <table class="table table-sm table-striped">
+          <tr>
+            <th>Title</th>
+            <th>Artist</th>
+            <th>Album</th>
+          </tr>
+        </table> 
+      </section>
+        <%- include('./partials/_footer'); %>
     </div>
   </body>
 </html>

@@ -1,0 +1,40 @@
+{
+  "name": "srchr",
+  "version": "1.0.0",
+  "description": "Spotify Song Searcher",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ejherzog/srchr.git"
+  },
+  "keywords": [
+    "spotify",
+    "song",
+    "playlist",
+    "theme",
+    "find",
+    "search"
+  ],
+  "author": "ejherzog",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/ejherzog/srchr/issues"
+  },
+  "homepage": "https://github.com/ejherzog/srchr#readme",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.12.8",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.4.5"
+  }
+}

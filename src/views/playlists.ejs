@@ -5,10 +5,6 @@
     <%- include('./partials/_nav'); %>
     <div class="container mt-2">
         <section class="mt-5 p-1">
-            <p>WELCOME, <%= name %>!!!</p>
-        </section>
-        <hr>
-        <section class="mt-5 p-1">
         <table class="table table-sm table-striped">
           <tr>
             <th>Name</th>
@@ -17,12 +13,12 @@
           </tr>
           <% playlists.forEach(function(p) { %>
             <tr>
-              <td><%= p.name %></td>
-              <td><%= p.description %></td>
-              <td><%= p.trackCount %></td>
+              <td><%- p.name %></td>
+              <td class="overflow-hidden"><%- p.description %></td>
+              <td><%- p.trackCount %></td>
             </tr>
           <% }) %>
-        </table> 
+        </table>
       </section>
         <%- include('./partials/_footer'); %>
     </div>

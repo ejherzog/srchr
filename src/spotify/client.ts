@@ -1,4 +1,5 @@
-import ky from "ky";
+import ky, { Input, Options } from "ky";
+import { formatDescription } from "../utils";
 
 // export async function initializePublicSession(): Promise<string> {
 
@@ -39,20 +40,45 @@ export async function getUserDisplayName(token: string) {
 
 export async function getUserPlaylists(token: string) {
 
-    const playlistResponse: any = await ky.get('https://api.spotify.com/v1/me/playlists', {
-        headers: { 'Authorization': `Bearer ${token}`}
-    }).json();
+    const responses: any[] = await getAllAuthRequest('https://api.spotify.com/v1/me/playlists', token);
 
-    const rawData: any[] = playlistResponse['items'];
+    const rawData: any[] = [];
+    responses.forEach(response => {
+        rawData.push(...response['items']);
+    });
+
     const playlists: any[] = [];
-
     rawData.forEach(item => {
         playlists.push({
             name: item.name,
             trackCount: item.tracks.total,
-            description: item.description
+            description: formatDescription(item.description as string)
         })
     });
 
-    return playlists;
+    return playlists.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+async function getAuthRequest(uri: Input, token: string) {
+    return await ky.get(uri, {
+        headers: { 'Authorization': `Bearer ${token}`}
+    }).json();
+}
+
+async function getRequest(uri: Input, options?: Options | undefined) {
+    return await ky.get(uri, options).json();
+}
+
+async function getAllAuthRequest(uri: Input, token: string) {
+
+    var allResponses: any[] = [];
+    var response: any = {};
+
+    do {
+        response = await getAuthRequest(uri, token);
+        allResponses.push(response);
+        uri = response.next;
+    } while (uri);
+
+    return allResponses;
 }

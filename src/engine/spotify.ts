@@ -1,5 +1,5 @@
 import ky, { Input, Options } from "ky";
-import { formatDescription } from "../utils";
+import { formatDescription } from "./utils";
 
 // export async function initializePublicSession(): Promise<string> {
 
@@ -56,13 +56,51 @@ export async function getUserPlaylists(token: string) {
         })
     });
 
-    return playlists.sort((a, b) => a.name.localeCompare(b.name));
+    return playlists;
+}
+
+// export async function getUsersSavedTracks(token: string) {
+
+//     const responses: any[] = await getAllAuthRequest('https://api.spotify.com/v1/me/tracks', token);
+
+//     console.log(responses);
+
+//     return [];
+// }
+
+export async function getFeaturedPlaylistTracks(token: string) {
+
+    var allResponses: any[] = [];
+    var response: any = {};
+    var uri = 'https://api.spotify.com/v1/browse/featured-playlists';
+
+    while (uri) {
+        response = await getAuthRequest(uri, token);
+        allResponses.push(response);
+        uri = response.playlists.next;
+    }
+
+    console.log(allResponses);
+
+    const rawData: any[] = [];
+    allResponses.forEach(response => {
+        rawData.push(...response['playlists']['items']['tracks']);
+    });
+
+    console.log(rawData);
+
+    const trackHrefs: string[] = [];
+    rawData.forEach(track => {
+        if (track.href) trackHrefs.push(track.href);
+    });
+
+    console.log(trackHrefs);
+
+    return [];
 }
 
 async function getAuthRequest(uri: Input, token: string) {
-    return await ky.get(uri, {
-        headers: { 'Authorization': `Bearer ${token}`}
-    }).json();
+    return await getRequest(uri, { headers: { 'Authorization': `Bearer ${token}`}});
 }
 
 async function getRequest(uri: Input, options?: Options | undefined) {

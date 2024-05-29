@@ -27,7 +27,7 @@ export function userLogin(req: Request, res: Response) {
 
     if (req.cookies['user-token'] === undefined) {
         var state = uuidv4();
-        var scope = 'user-read-private user-read-email playlist-read-private';
+        var scope = 'user-read-private user-read-email playlist-read-private user-library-read';
     
         res.redirect('https://accounts.spotify.com/authorize?' +
         querystring.stringify({

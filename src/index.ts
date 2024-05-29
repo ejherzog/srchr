@@ -5,7 +5,9 @@ import bodyParser from "body-parser";
 import { fileURLToPath } from 'url';
 import cookieParser from "cookie-parser";
 import { authenticate, getTokenCookie, userLogin } from "./middleware/token";
-import { getUserDisplayName, getUserPlaylists } from "./spotify/client";
+import { getUserDisplayName, getUserPlaylists } from "./engine/spotify";
+import { sortByTitle } from "./engine/utils";
+import { durationSearch } from "./engine/search";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -49,13 +51,47 @@ app.get('/playlists', async (req: Request, res: Response) => {
     const playlistData = await getUserPlaylists(token);
     res.render('playlists', {
         name: displayName,
-        playlists: playlistData
+        playlists: sortByTitle(playlistData)
     });
 });
+
+app.get('/search', async (req: Request, res: Response) => {
+    const token = getTokenCookie(req);
+    const displayName = await getUserDisplayName(token);
+    res.render('search', {
+        name: displayName
+    });
+});
+
+// app.get('/results', async (req: Request, res: Response) => {
+//     const token = getTokenCookie(req);
+//     const displayName = await getUserDisplayName(token);
+//     res.render('results', {
+//         name: displayName
+//     });
+// });
 
 app.get('/about', async (req: Request, res: Response) => {
     res.render('about', {
         name: await nameIfLoggedIn(req)
+    });
+});
+
+app.post('/title', async (req: Request, res: Response) => {
+    console.log(req.body);
+    res.redirect('/results');
+});
+
+app.post('/duration', async (req: Request, res: Response) => {
+    console.log(req.body);
+    const token = getTokenCookie(req);
+    const displayName = await getUserDisplayName(token);
+    const tracks = await durationSearch(getTokenCookie(req), 
+        req.body.comparison, req.body.include, req.body.min, req.body.sec
+    );
+    res.render('results', {
+        name: displayName,
+        tracks: tracks
     });
 });
 

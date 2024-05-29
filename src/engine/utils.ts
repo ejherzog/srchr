@@ -22,3 +22,7 @@ function removeTags(str: string) {
     // HTML tag with a null string.
     return str.replace(/(<([^>]+)>)/ig, '');
 }
+
+export function sortByTitle(playlists: any[]) {
+    return playlists.sort((a, b) => a.name.localeCompare(b.name));
+}

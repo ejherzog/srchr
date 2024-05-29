@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+  <%- include('./partials/_head'); %>
+  <body>
+    <%- include('./partials/_nav'); %>
+    <div class="container mt-2">
+        <section class="mt-5 p-1">
+            <h4>Search By Title</h4>
+            <p>This form allows you search for a specific string of characters in the title of the songs in your library.</p>
+            <p>You can specify that the song title must start with or end with the search term or you can choose 'contain' which will look anywhere in the song title.</p>
+            <form action="/title" method="POST">
+                <div class="row g-3 align-items-center">
+                    <div class="col-auto">
+                      <label for="where" class="col-form-label">Find song titles that</label>
+                    </div>
+                    <div class="col-auto">
+                        <select class="custom-select" name="where" id="where">
+                            <option disabled value="" selected>--- Select One ---</option>
+                            <option value="starts">Start With</option>
+                            <option value="contains">Contain</option>
+                            <option value="ends">End With</option>
+                        </select>
+                    </div>
+                  </div>
+                  <br>
+                <div class="row g-3 align-items-center">
+                    <div class="col-auto">
+                      <label for="what" class="col-form-label">Search Term:</label>
+                    </div>
+                    <div class="col-auto">
+                      <input type="text" id="what" name="what" class="form-control" aria-describedby="searchTermHelpInline">
+                    </div>
+                    <div class="col-auto">
+                      <span id="searchTermHelpInline" class="form-text">
+                        Must be 1-20 characters long.
+                      </span>
+                    </div>
+                  </div>
+                  <br>
+                  <div class="row g-3 align-items-center">
+                    <div class="col-auto">
+                        <input type="checkbox" id="playlists" name="include" value="playlists" checked>
+                        <label for="playlists">Include My Playlists</label>
+                    </div>
+                    <br>
+                    <div class="col-auto">
+                        <input type="checkbox" id="albums" name="include" value="albums" checked>
+                        <label for="albums">Include My Saved Albums</label>
+                    </div>
+                    <br>
+                    <div class="col-auto">
+                        <input type="checkbox" id="featured" name="include" value="featured">
+                        <label for="featured">Include Spotify Recommendations</label>
+                    </div>
+                </div>
+                    <br>
+                <button type="submit" class="btn btn-success">Search</button>
+            </form>
+        </section>
+        <hr>
+        <section class="mt-5 p-1">
+            <h4>Search By Duration</h4>
+            <p>This form allows you search for songs that are more or less than a specific amount of time as well as exactly equal to a specified length of time.</p>
+            <form action="/duration" method="POST">
+                <div class="row g-3 align-items-center">
+                    <div class="col-auto">
+                      <label for="comparison" class="col-form-label">Find songs that are </label>
+                    </div>
+                    <div class="col-auto">
+                        <select class="custom-select" name="comparison" id="comparison">
+                            <option disabled value="" selected>--- Select One ---</option>
+                            <option value="more">More Than</option>
+                            <option value="exact">Exactly</option>
+                            <option value="less">Less Than</option>
+                        </select>
+                    </div>
+                  </div>
+                  <br>
+                <div class="row g-3 align-items-center">
+                    <div class="col-auto">
+                      <label for="min" class="col-form-label">Minutes:</label>
+                    </div>
+                    <div class="col-auto">
+                      <input type="text" id="min" name="min" class="form-control" aria-describedby="minutesHelpInline" value="0" min="0">
+                    </div>
+                    <div class="col-auto">
+                      <span id="minutesHelpInline" class="form-text">
+                        Number of minutes. Can be 0 or any positive integer.
+                      </span>
+                    </div>
+                  </div>
+                  <br>
+                  <div class="row g-3 align-items-center">
+                    <div class="col-auto">
+                      <label for="sec" class="col-form-label">Seconds:</label>
+                    </div>
+                    <div class="col-auto">
+                      <input type="text" id="sec" name="sec" class="form-control" aria-describedby="secondsHelpInline" value="0" min="0" max="59">
+                    </div>
+                    <div class="col-auto">
+                      <span id="secondsHelpInline" class="form-text">
+                        Must be between 0 and 59 seconds.
+                      </span>
+                    </div>
+                  </div>
+                  <br>
+                  <div class="row g-3 align-items-center">
+                    <div class="col-auto">
+                        <input type="checkbox" id="playlists" name="include" value="playlists" checked>
+                        <label for="playlists">Include My Playlists</label>
+                    </div>
+                    <br>
+                    <div class="col-auto">
+                        <input type="checkbox" id="albums" name="include" value="albums" checked>
+                        <label for="albums">Include My Saved Albums</label>
+                    </div>
+                    <br>
+                    <div class="col-auto">
+                        <input type="checkbox" id="tracks" name="include" value="tracks">
+                        <label for="albums">Include My Saved Tracks (Liked Songs)</label>
+                    </div>
+                    <br>
+                    <div class="col-auto">
+                        <input type="checkbox" id="featured" name="include" value="featured">
+                        <label for="featured">Include Spotify Recommendations</label>
+                    </div>
+                </div>
+                    <br>
+                <button type="submit" class="btn btn-success">Search</button>
+            </form>
+        </section>
+        <%- include('./partials/_footer'); %>
+    </div>
+  </body>
+</html>

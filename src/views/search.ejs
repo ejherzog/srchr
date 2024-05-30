@@ -67,7 +67,7 @@
                       <label for="comparison" class="col-form-label">Find songs that are </label>
                     </div>
                     <div class="col-auto">
-                        <select class="custom-select" name="comparison" id="comparison">
+                        <select class="custom-select" name="comparison" id="comparison" required>
                             <option disabled value="" selected>--- Select One ---</option>
                             <option value="more">More Than</option>
                             <option value="exact">Exactly</option>
@@ -81,7 +81,7 @@
                       <label for="min" class="col-form-label">Minutes:</label>
                     </div>
                     <div class="col-auto">
-                      <input type="text" id="min" name="min" class="form-control" aria-describedby="minutesHelpInline" value="0" min="0">
+                      <input type="text" id="min" name="min" class="form-control" aria-describedby="minutesHelpInline" value="0" min="0" required>
                     </div>
                     <div class="col-auto">
                       <span id="minutesHelpInline" class="form-text">
@@ -95,7 +95,7 @@
                       <label for="sec" class="col-form-label">Seconds:</label>
                     </div>
                     <div class="col-auto">
-                      <input type="text" id="sec" name="sec" class="form-control" aria-describedby="secondsHelpInline" value="0" min="0" max="59">
+                      <input type="text" id="sec" name="sec" class="form-control" aria-describedby="secondsHelpInline" value="0" min="0" max="59" required>
                     </div>
                     <div class="col-auto">
                       <span id="secondsHelpInline" class="form-text">

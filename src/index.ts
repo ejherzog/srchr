@@ -8,6 +8,7 @@ import { authenticate, getTokenCookie, userLogin } from "./middleware/token";
 import { getUserDisplayName, getUserPlaylists } from "./engine/spotify";
 import { sortByTitle } from "./engine/utils";
 import { durationSearch } from "./engine/search";
+import { getUsersPlaylistTracks } from "./engine/tracks";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -63,14 +64,6 @@ app.get('/search', async (req: Request, res: Response) => {
     });
 });
 
-// app.get('/results', async (req: Request, res: Response) => {
-//     const token = getTokenCookie(req);
-//     const displayName = await getUserDisplayName(token);
-//     res.render('results', {
-//         name: displayName
-//     });
-// });
-
 app.get('/about', async (req: Request, res: Response) => {
     res.render('about', {
         name: await nameIfLoggedIn(req)
@@ -78,16 +71,19 @@ app.get('/about', async (req: Request, res: Response) => {
 });
 
 app.post('/title', async (req: Request, res: Response) => {
-    console.log(req.body);
+    const token = getTokenCookie(req);
+    const displayName = await getUserDisplayName(token);
     res.redirect('/results');
+    res.render('results', {
+        name: displayName
+    });
 });
 
 app.post('/duration', async (req: Request, res: Response) => {
-    console.log(req.body);
     const token = getTokenCookie(req);
     const displayName = await getUserDisplayName(token);
-    const tracks = await durationSearch(getTokenCookie(req), 
-        req.body.comparison, req.body.include, req.body.min, req.body.sec
+    const tracks = await durationSearch(token, req.body.comparison,
+        req.body.include, req.body.min, req.body.sec
     );
     res.render('results', {
         name: displayName,

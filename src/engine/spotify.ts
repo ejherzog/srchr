@@ -80,26 +80,20 @@ export async function getFeaturedPlaylistTracks(token: string) {
         uri = response.playlists.next;
     }
 
-    console.log(allResponses);
-
-    const rawData: any[] = [];
+    const playlists: any[] = [];
     allResponses.forEach(response => {
-        rawData.push(...response['playlists']['items']['tracks']);
+        playlists.push(...response['playlists']['items']);
     });
-
-    console.log(rawData);
 
     const trackHrefs: string[] = [];
-    rawData.forEach(track => {
+    playlists.forEach(track => {
         if (track.href) trackHrefs.push(track.href);
     });
-
-    console.log(trackHrefs);
 
     return [];
 }
 
-async function getAuthRequest(uri: Input, token: string) {
+export async function getAuthRequest(uri: Input, token: string) {
     return await getRequest(uri, { headers: { 'Authorization': `Bearer ${token}`}});
 }
 

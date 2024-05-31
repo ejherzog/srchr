@@ -1,4 +1,4 @@
-import ky, { Input, Options } from "ky";
+import ky, { HTTPError, Input, Options } from "ky";
 import { formatDescription } from "./utils";
 
 // export async function initializePublicSession(): Promise<string> {
@@ -29,13 +29,18 @@ import { formatDescription } from "./utils";
 //     console.log(response);
 // }
 
-export async function getUserDisplayName(token: string) {
+export async function getUserDisplayName(token: string): Promise<string> {
+    const userInfo = await getUserInfo(token);
+    return userInfo.displayName;
+}
+
+export async function getUserInfo(token: string): Promise<{ displayName: string, userId: string}> {
 
     const userResponse: any = await ky.get('https://api.spotify.com/v1/me', {
         headers: { 'Authorization': `Bearer ${token}`}
     }).json();
 
-    return userResponse['display_name'];
+    return { displayName: userResponse['display_name'], userId: userResponse['id'] };
 }
 
 export async function getUserPlaylists(token: string) {
@@ -93,12 +98,27 @@ export async function getFeaturedPlaylistTracks(token: string) {
     return [];
 }
 
+export async function postAuthRequest(uri: Input, body: any, token: string) {
+    try {
+        return await postRequest(uri, { 
+            json: body,
+            headers: { 'Authorization': `Bearer ${token}`}
+        });
+    } catch (error: any) {
+        console.log(error.response.body);
+    }
+}
+
 export async function getAuthRequest(uri: Input, token: string) {
     return await getRequest(uri, { headers: { 'Authorization': `Bearer ${token}`}});
 }
 
 async function getRequest(uri: Input, options?: Options | undefined) {
     return await ky.get(uri, options).json();
+}
+
+async function postRequest(uri: Input, options?: Options | undefined) {
+    return await ky.post(uri, options).json();
 }
 
 async function getAllAuthRequest(uri: Input, token: string) {

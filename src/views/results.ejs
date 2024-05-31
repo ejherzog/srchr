@@ -5,20 +5,41 @@
     <%- include('./partials/_nav'); %>
     <div class="container mt-2">
       <section class="mt-5 p-1">
-        <table class="table table-sm table-striped">
-          <tr>
-            <th>Name</th>
-            <th>Artists</th>
-            <th>Duration</th>
-          </tr>
-          <% tracks.forEach(function(t) { %>
+        <form action="/create" method="POST">
+          <table class="table table-sm table-striped">
             <tr>
-              <td><%- t.name %></td>
-              <td><%- t.artists %></td>
-              <td><%- t.duration_ms %></td>
+              <th>☑</th>
+              <th>Name</th>
+              <th>Artists</th>
+              <th>Duration</th>
             </tr>
-          <% }) %>
-        </table>
+            <% tracks.forEach(function(t) { %>
+              <tr>
+                <td><input type="checkbox" id="<%= t.uri %>" name="tracks" value="<%= t.uri %>" checked></td>
+                <td><%- t.name %></td>
+                <td><%- t.artists %></td>
+                <td><%- t.duration_ms %></td>
+              </tr>
+            <% }) %>
+          </table>
+          <div class="row g-3 align-items-center">
+            <div class="col-auto">
+              <label for="playlistName" class="col-form-label">Playlist Name:</label>
+            </div>
+            <div class="col-auto">
+              <input type="text" id="playlistName" name="playlistName" class="form-control" required>
+            </div>
+          </div>
+          <div class="row g-3 align-items-center">
+            <div class="col-auto">
+              <label for="description" class="col-form-label">Description:</label>
+            </div>
+            <div class="col-auto">
+              <input type="text" id="description" name="description" class="form-control">
+            </div>
+          </div>
+          <button type="submit" class="btn btn-success">Create Playlist with Selected Tracks</button>
+        </form>
       </section>
         <%- include('./partials/_footer'); %>
     </div>

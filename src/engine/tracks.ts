@@ -39,7 +39,7 @@ async function getTracksFromPlaylistLinks(token: string, playlistHrefs: string[]
                 item.track.artists.forEach((artistObject: { name: string; }) => {
                     artists.push(artistObject.name);
                 });
-                trackMap.set(item.track.id, { duration_ms: item.track.duration_ms, 
+                trackMap.set(item.track.uri, { duration_ms: item.track.duration_ms, 
                     name: item.track.name, artists: artists.join(", ")});
             }
         });

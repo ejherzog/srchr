@@ -5,10 +5,10 @@ import bodyParser from "body-parser";
 import { fileURLToPath } from 'url';
 import cookieParser from "cookie-parser";
 import { authenticate, getTokenCookie, userLogin } from "./middleware/token";
-import { getUserDisplayName, getUserPlaylists } from "./engine/spotify";
+import { getUserInfo, getUserPlaylists } from "./engine/spotify";
 import { sortByTitle } from "./engine/utils";
 import { durationSearch } from "./engine/search";
-import { getUsersPlaylistTracks } from "./engine/tracks";
+import { createNewPlaylist } from "./engine/playlists";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,8 +23,9 @@ app.use(cors());
 app.use(cookieParser());
 
 app.get('/', async (req: Request, res: Response) => {
+    const user = await nameIfLoggedIn(req);
     res.render('index', {
-        name: await nameIfLoggedIn(req)
+        name: user?.displayName
     });
 });
 
@@ -38,7 +39,7 @@ app.get('/auth', async (req: Request, res: Response) => {
 
 // app.get('/logged_in', async (req: Request, res: Response) => {
 //     const token = getTokenCookie(req);
-//     const displayName = await getUserDisplayName(token);
+//     const user = await getUserInfo(token);
 //     const playlistData = await getUserPlaylists(token);
 //     console.log(playlistData);
 //     res.render('logged_in', {
@@ -48,19 +49,19 @@ app.get('/auth', async (req: Request, res: Response) => {
 
 app.get('/playlists', async (req: Request, res: Response) => {
     const token = getTokenCookie(req);
-    const displayName = await getUserDisplayName(token);
+    const user = await getUserInfo(token);
     const playlistData = await getUserPlaylists(token);
     res.render('playlists', {
-        name: displayName,
+        name: user.displayName,
         playlists: sortByTitle(playlistData)
     });
 });
 
 app.get('/search', async (req: Request, res: Response) => {
     const token = getTokenCookie(req);
-    const displayName = await getUserDisplayName(token);
+    const user = await getUserInfo(token);
     res.render('search', {
-        name: displayName
+        name: user.displayName
     });
 });
 
@@ -72,22 +73,33 @@ app.get('/about', async (req: Request, res: Response) => {
 
 app.post('/title', async (req: Request, res: Response) => {
     const token = getTokenCookie(req);
-    const displayName = await getUserDisplayName(token);
+    const user = await getUserInfo(token);
     res.redirect('/results');
     res.render('results', {
-        name: displayName
+        name: user.displayName
     });
 });
 
 app.post('/duration', async (req: Request, res: Response) => {
     const token = getTokenCookie(req);
-    const displayName = await getUserDisplayName(token);
+    const user = await getUserInfo(token);
     const tracks = await durationSearch(token, req.body.comparison,
         req.body.include, req.body.min, req.body.sec
     );
     res.render('results', {
-        name: displayName,
+        name: user.displayName,
         tracks: tracks
+    });
+});
+
+app.post('/create', async (req: Request, res: Response) => {
+    const token = getTokenCookie(req);
+    const user = await getUserInfo(token);
+    const playlistUrl = await createNewPlaylist(req.body, user.userId, token);
+    res.render('success', {
+        name: user.displayName,
+        playlistName: req.body.playlistName, 
+        playlistUrl
     });
 });
 
@@ -101,7 +113,7 @@ async function nameIfLoggedIn(req: Request) {
 
     var token = req.cookies['user-token'];
     if (token) {
-        return await getUserDisplayName(token);
+        return await getUserInfo(token);
     } else {
         return undefined;
     }

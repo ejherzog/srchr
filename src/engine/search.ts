@@ -12,9 +12,9 @@ export async function durationSearch(token: string, comparison: string,
     // search through tracks
     var matches: any[] = [];
 
-    trackMap.forEach((info, id, trackMap) => {
+    trackMap.forEach((info, uri, trackMap) => {
         if (fitsCriteria(info.duration_ms, comparison, duration)) {
-            matches.push({ id, ...info });
+            matches.push({ uri, ...info });
         }
     });
 

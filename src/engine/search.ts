@@ -1,19 +1,18 @@
-import { getFeaturedPlaylistsTracks } from "./tracks";
+import { getFeaturedPlaylistsTracks, getNewReleaseTracks, getUsersAlbumTracks, getUsersPlaylistTracks, getUsersSavedTracks } from "./tracks";
 
 export async function durationSearch(token: string, comparison: string,
     include: string[], minutes: string, seconds: string) {
 
     // validate input and translate to search criteria
+    // TODO: there needs to be tolerance for milliseconds versus what appears in the UI
     const duration = (parseInt(seconds) + (60 * parseInt(minutes))) * 1000;
 
-    // build track list (remove dedupes if possible)
-    const trackMap: Map<string, any> = await getFeaturedPlaylistsTracks(token);
-
+    const allTracksMap = await getTracksToInclude(include, token);
     // search through tracks
     var matches: any[] = [];
 
-    trackMap.forEach((info, uri, trackMap) => {
-        if (fitsCriteria(info.duration_ms, comparison, duration)) {
+    allTracksMap.forEach((info, uri, trackMap) => {
+        if (fitsDurationCriteria(info.duration_ms, comparison, duration)) {
             matches.push({ uri, ...info });
         }
     });
@@ -22,7 +21,28 @@ export async function durationSearch(token: string, comparison: string,
     return matches.sort((a, b) => a.duration_ms - b.duration_ms);
 }
 
-function fitsCriteria(trackDuration: number, comparison: string, desiredDuration: number): boolean {
+async function getTracksToInclude(include: string[], token: string): Promise<Map<string, any>> {
+
+    // build track list based on what user wants to include
+    var promiseArray: Promise<Map<string, any>>[] = [];
+    if (include.includes('featured')) promiseArray.push(getFeaturedPlaylistsTracks(token));
+    if (include.includes('playlists')) promiseArray.push(getUsersPlaylistTracks(token));
+    if (include.includes('albums')) promiseArray.push(getUsersAlbumTracks(token));
+    if (include.includes('tracks')) promiseArray.push(getUsersSavedTracks(token));
+    if (include.includes('new')) promiseArray.push(getNewReleaseTracks(token));
+
+    const resolvedArray = await Promise.all(promiseArray);
+    var trackMapArray: Map<string, any>[] = [];
+    resolvedArray.forEach(result => {
+        trackMapArray.push(result);
+    });
+
+    // merge all the track maps together
+    const allTracksArray = trackMapArray.flatMap(m => [...m]);
+    return new Map(allTracksArray);
+}
+
+function fitsDurationCriteria(trackDuration: number, comparison: string, desiredDuration: number): boolean {
 
     switch(comparison) {
         case 'less':

@@ -1,6 +1,10 @@
 import { getAuthRequest, postAuthRequest } from "./spotify";
 
+const CHUNK_SIZE = 50;
+
 export async function getUsersPlaylistArray(token: string) {
+
+    console.log('user playlists');
 
     var allResponses: any[] = [];
     var latestResponse: any = {};
@@ -25,7 +29,9 @@ export async function getUsersPlaylistArray(token: string) {
     return playlistHrefs;
 }
 
-export async function getFeaturePlaylistsArray(token: string) {
+export async function getFeaturedPlaylistsArray(token: string) {
+
+    console.log('popular playlists');
 
     var allResponses: any[] = [];
     var latestResponse: any = {};
@@ -58,13 +64,24 @@ export async function createNewPlaylist(requestBody: { playlistName: string, des
     const playlistInfo = { name: requestBody.playlistName, description: requestBody.description, public: false };
 
     const playlistResponse: any = await postAuthRequest(createUri, playlistInfo, token);
+    const playlistId = playlistResponse.id;
 
     // split trackUris into size 50 chunks
     const tracksToAdd = requestBody.tracks;
+    for (let i = 0; i < tracksToAdd.length; i += CHUNK_SIZE) {
+        const chunk = tracksToAdd.slice(i, i + CHUNK_SIZE);
 
-    // for each chunk of trackUris, add tracks to newly created playlist
-    // needs playlist_id and uris
+        // for each chunk of trackUris, add tracks to newly created playlist
+        await addTracksToPlaylist(playlistId, chunk, token);
+    }
 
     // return playlistUrl
     return playlistResponse.external_urls.spotify;
+}
+
+async function addTracksToPlaylist(playlistId: string, tracks: string[], token: string) {
+
+    const addUri = `https://api.spotify.com/v1/playlists/${playlistId}/tracks`;
+
+    await postAuthRequest(addUri, { uris: tracks }, token);
 }

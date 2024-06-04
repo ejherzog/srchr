@@ -4,8 +4,6 @@ const CHUNK_SIZE = 50;
 
 export async function getUsersPlaylistArray(token: string) {
 
-    console.log('user playlists');
-
     var allResponses: any[] = [];
     var latestResponse: any = {};
     var uri = 'https://api.spotify.com/v1/me/playlists';
@@ -30,8 +28,6 @@ export async function getUsersPlaylistArray(token: string) {
 }
 
 export async function getFeaturedPlaylistsArray(token: string) {
-
-    console.log('popular playlists');
 
     var allResponses: any[] = [];
     var latestResponse: any = {};

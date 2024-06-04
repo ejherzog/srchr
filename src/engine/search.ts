@@ -1,4 +1,5 @@
 import { getFeaturedPlaylistsTracks, getNewReleaseTracks, getUsersAlbumTracks, getUsersPlaylistTracks, getUsersSavedTracks } from "./tracks";
+import { getDisplayDuration } from "./utils";
 
 export async function durationSearch(token: string, comparison: string,
     include: string[], minutes: string, seconds: string) {
@@ -13,7 +14,7 @@ export async function durationSearch(token: string, comparison: string,
 
     allTracksMap.forEach((info, uri, trackMap) => {
         if (fitsDurationCriteria(info.duration_ms, comparison, duration)) {
-            matches.push({ uri, ...info });
+            matches.push({ uri, ...info, duration_min: getDisplayDuration(info.duration_ms) });
         }
     });
 

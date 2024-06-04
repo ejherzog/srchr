@@ -4,8 +4,6 @@ import { getAuthRequest } from "./spotify";
 
 export async function getUsersSavedTracks(token: string): Promise<Map<string, any>> {
 
-    console.log('saved tracks');
-
     var allResponses: any[] = [];
     var latestResponse: any = {};
     var uri = 'https://api.spotify.com/v1/me/tracks';

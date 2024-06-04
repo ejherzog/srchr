@@ -11,13 +11,10 @@ export function getTokenCookie(req: Request) {
 
 // export function checkUserToken(req: Request, res: Response, next: NextFunction) {
 
-//     console.log(req.cookies);
 //     var userToken: string;
 //     var cookie = req.cookies['user-token'];
 //     if (cookie) {
 //         userToken = cookie;
-//         console.log(req.cookies);
-//         console.log(userToken);
 //         res.cookie('user-token', userToken, { expires: new Date(Date.now() + 3600), httpOnly: true, sameSite: 'strict' });
 //     }
 //     next();

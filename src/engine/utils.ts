@@ -1,3 +1,5 @@
+import prettyMilliseconds from "pretty-ms";
+
 export function formatDescription(str: string) {
     const cleanStr = removeTags(str);
     if (cleanStr) return truncateString(cleanStr, 80);
@@ -25,4 +27,8 @@ function removeTags(str: string) {
 
 export function sortByTitle(playlists: any[]) {
     return playlists.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export function getDisplayDuration(duration_ms: number): string {
+    return prettyMilliseconds( Math.round(duration_ms/1000) * 1000, { colonNotation: true, secondsDecimalDigits: 0 });
 }

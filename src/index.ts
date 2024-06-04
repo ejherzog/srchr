@@ -41,7 +41,6 @@ app.get('/auth', async (req: Request, res: Response) => {
 //     const token = getTokenCookie(req);
 //     const user = await getUserInfo(token);
 //     const playlistData = await getUserPlaylists(token);
-//     console.log(playlistData);
 //     res.render('logged_in', {
 //         name: displayName
 //     });

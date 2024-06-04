@@ -37,6 +37,7 @@
     "express": "^4.19.2",
     "formdata-node": "^6.0.3",
     "ky": "^1.2.4",
+    "pretty-ms": "^9.0.0",
     "uuid": "^9.0.1"
   },
   "devDependencies": {

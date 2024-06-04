@@ -2,8 +2,6 @@ import { getAuthRequest } from "./spotify";
 
 export async function getUsersAlbumArray(token: string) {
 
-    console.log('saved albums');
-
     var allResponses: any[] = [];
     var latestResponse: any = {};
     var uri = 'https://api.spotify.com/v1/me/albums';
@@ -28,8 +26,6 @@ export async function getUsersAlbumArray(token: string) {
 }
 
 export async function getNewReleaseAlbumsArray(token: string) {
-
-    console.log('new releases');
 
     var allResponses: any[] = [];
     var latestResponse: any = {};

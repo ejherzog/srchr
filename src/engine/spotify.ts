@@ -26,7 +26,6 @@ import { formatDescription } from "./utils";
 //         }}
 //     ).json();
 
-//     console.log(response);
 // }
 
 export async function getUserDisplayName(token: string): Promise<string> {
@@ -63,15 +62,6 @@ export async function getUserPlaylists(token: string) {
 
     return playlists;
 }
-
-// export async function getUsersSavedTracks(token: string) {
-
-//     const responses: any[] = await getAllAuthRequest('https://api.spotify.com/v1/me/tracks', token);
-
-//     console.log(responses);
-
-//     return [];
-// }
 
 export async function getFeaturedPlaylistTracks(token: string) {
 

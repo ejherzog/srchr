@@ -11,16 +11,14 @@
               <th>☑</th>
               <th>Name</th>
               <th>Artists</th>
-              <th>Milliseconds</th>
-              <th>Min & Sec</th>
+              <th>Duration</th>
             </tr>
             <% tracks.forEach(function(t) { %>
               <tr>
                 <td><input type="checkbox" id="<%= t.uri %>" name="tracks" value="<%= t.uri %>" checked></td>
                 <td><%- t.name %></td>
                 <td><%- t.artists %></td>
-                <td><%- t.duration_ms %></td>
-                <td><%- t.duration_min %></td>
+                <td><%- t.duration %></td>
               </tr>
             <% }) %>
           </table>

@@ -14,12 +14,13 @@ export async function durationSearch(token: string, comparison: string,
 
     allTracksMap.forEach((info, uri, trackMap) => {
         if (fitsDurationCriteria(info.duration_ms, comparison, duration)) {
-            matches.push({ uri, ...info, duration_min: getDisplayDuration(info.duration_ms) });
+            matches.push({ uri, name: info.name, artists: info.artists, 
+                duration: getDisplayDuration(info.duration_ms) });
         }
     });
 
     // return list of tracks matching specifications
-    return matches.sort((a, b) => a.duration_ms - b.duration_ms);
+    return matches.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 async function getTracksToInclude(include: string[], token: string): Promise<Map<string, any>> {

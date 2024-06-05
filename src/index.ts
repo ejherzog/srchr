@@ -7,7 +7,7 @@ import cookieParser from "cookie-parser";
 import { authenticate, getTokenCookie, userLogin } from "./middleware/token";
 import { getUserInfo, getUserPlaylists } from "./engine/spotify";
 import { sortByTitle } from "./engine/utils";
-import { durationSearch } from "./engine/search";
+import { durationSearch, titleSearch } from "./engine/search";
 import { createNewPlaylist } from "./engine/playlists";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -73,9 +73,11 @@ app.get('/about', async (req: Request, res: Response) => {
 app.post('/title', async (req: Request, res: Response) => {
     const token = getTokenCookie(req);
     const user = await getUserInfo(token);
-    res.redirect('/results');
+    const tracks = await titleSearch(token, req.body.where,
+        req.body.include, req.body.what );
     res.render('results', {
-        name: user.displayName
+        name: user.displayName,
+        tracks: tracks
     });
 });
 
@@ -83,8 +85,7 @@ app.post('/duration', async (req: Request, res: Response) => {
     const token = getTokenCookie(req);
     const user = await getUserInfo(token);
     const tracks = await durationSearch(token, req.body.comparison,
-        req.body.include, req.body.min, req.body.sec
-    );
+        req.body.include, req.body.min, req.body.sec );
     res.render('results', {
         name: user.displayName,
         tracks: tracks

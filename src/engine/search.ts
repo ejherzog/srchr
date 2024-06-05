@@ -5,15 +5,15 @@ export async function durationSearch(token: string, comparison: string,
     include: string[], minutes: string, seconds: string) {
 
     // validate input and translate to search criteria
-    // TODO: there needs to be tolerance for milliseconds versus what appears in the UI
     const duration = (parseInt(seconds) + (60 * parseInt(minutes))) * 1000;
 
     const allTracksMap = await getTracksToInclude(include, token);
     // search through tracks
     var matches: any[] = [];
 
+    const display = comparison == 'exact' ? getDisplayDuration(duration) : undefined;
     allTracksMap.forEach((info, uri, trackMap) => {
-        if (fitsDurationCriteria(info.duration_ms, comparison, duration)) {
+        if (fitsDurationCriteria(info.duration_ms, comparison, duration, display)) {
             matches.push({ uri, name: info.name, artists: info.artists, 
                 duration: getDisplayDuration(info.duration_ms) });
         }
@@ -21,6 +21,10 @@ export async function durationSearch(token: string, comparison: string,
 
     // return list of tracks matching specifications
     return matches.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export async function titleSearch(token: string, where: string, what: string, include: string) {
+    return [];
 }
 
 async function getTracksToInclude(include: string[], token: string): Promise<Map<string, any>> {
@@ -44,7 +48,8 @@ async function getTracksToInclude(include: string[], token: string): Promise<Map
     return new Map(allTracksArray);
 }
 
-function fitsDurationCriteria(trackDuration: number, comparison: string, desiredDuration: number): boolean {
+function fitsDurationCriteria(trackDuration: number, comparison: string, 
+    desiredDuration: number, desiredDisplay: string | undefined): boolean {
 
     switch(comparison) {
         case 'less':
@@ -53,6 +58,7 @@ function fitsDurationCriteria(trackDuration: number, comparison: string, desired
             return trackDuration >= desiredDuration;
         case 'exact':
         default:
-            return trackDuration == desiredDuration;
+            // don't use exact milliseconds, use displayed mm:ss instead for "equal" durations
+            return getDisplayDuration(trackDuration) == desiredDisplay;
     }
 }

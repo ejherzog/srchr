@@ -22,37 +22,7 @@
                         </select>
                     </div>
                   </div>
-                  <br>
-                <div class="row g-3 align-items-center">
-                    <div class="col-auto">
-                      <label for="what" class="col-form-label">Search Term:</label>
-                    </div>
-                    <div class="col-auto">
-                      <input type="text" id="what" name="what" class="form-control" aria-describedby="searchTermHelpInline">
-                    </div>
-                    <div class="col-auto">
-                      <span id="searchTermHelpInline" class="form-text">
-                        Must be 1-20 characters long.
-                      </span>
-                    </div>
-                  </div>
-                  <br>
-                  <div class="row g-3 align-items-center">
-                    <div class="col-auto">
-                        <input type="checkbox" id="playlists" name="include" value="playlists" checked>
-                        <label for="playlists">Include My Playlists</label>
-                    </div>
-                    <br>
-                    <div class="col-auto">
-                        <input type="checkbox" id="albums" name="include" value="albums" checked>
-                        <label for="albums">Include My Saved Albums</label>
-                    </div>
-                    <br>
-                    <div class="col-auto">
-                        <input type="checkbox" id="featured" name="include" value="featured">
-                        <label for="featured">Include Spotify Recommendations</label>
-                    </div>
-                </div>
+                  <%- include('./partials/_include'); %>
                     <br>
                 <button type="submit" class="btn btn-success">Search</button>
             </form>
@@ -103,38 +73,8 @@
                       </span>
                     </div>
                   </div>
+                  <%- include('./partials/_include'); %>
                   <br>
-                  <div class="row g-3 align-items-center">
-                    <div class="col-auto">
-                      <p>What do you want to include in your search?</p>
-                    </div>
-                  </div>
-                  <div class="row g-3 align-items-center">
-                    <div class="col-auto">
-                        <input type="checkbox" id="playlists" name="include" value="playlists" checked>
-                        <label for="playlists">My Playlists</label>
-                    </div>
-                    <br>
-                    <div class="col-auto">
-                        <input type="checkbox" id="albums" name="include" value="albums" checked>
-                        <label for="albums">My Saved Albums</label>
-                    </div>
-                    <br>
-                    <div class="col-auto">
-                        <input type="checkbox" id="tracks" name="include" value="tracks">
-                        <label for="albums">My Saved Tracks (Liked Songs)</label>
-                    </div>
-                    <br>
-                    <div class="col-auto">
-                        <input type="checkbox" id="featured" name="include" value="featured">
-                        <label for="featured">Popular Playlists</label>
-                    </div>
-                    <div class="col-auto">
-                      <input type="checkbox" id="new" name="include" value="featured">
-                      <label for="featured">New Releases</label>
-                  </div>
-                </div>
-                    <br>
                 <button type="submit" class="btn btn-success">Search</button>
             </form>
         </section>

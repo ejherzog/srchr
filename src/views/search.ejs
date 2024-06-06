@@ -22,6 +22,20 @@
                         </select>
                     </div>
                   </div>
+                  <br>
+                <div class="row g-3 align-items-center">
+                    <div class="col-auto">
+                      <label for="what" class="col-form-label">Search Term:</label>
+                    </div>
+                    <div class="col-auto">
+                      <input type="text" id="what" name="what" class="form-control" aria-describedby="searchTermHelpInline">
+                    </div>
+                    <div class="col-auto">
+                      <span id="searchTermHelpInline" class="form-text">
+                        Must be 1-20 characters long.
+                      </span>
+                    </div>
+                  </div>
                   <%- include('./partials/_include'); %>
                     <br>
                 <button type="submit" class="btn btn-success">Search</button>

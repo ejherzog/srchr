@@ -23,8 +23,21 @@ export async function durationSearch(token: string, comparison: string,
     return matches.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export async function titleSearch(token: string, where: string, what: string, include: string) {
-    return [];
+export async function titleSearch(token: string, where: string, what: string, include: string[]) {
+
+    const searchTerm = what.toLowerCase();
+    const allTracksMap = await getTracksToInclude(include, token);
+
+    var matches: any[] = [];
+
+    allTracksMap.forEach((info, uri, trackMap) => {
+        if (matchesTitleCriteria(info.name, where, searchTerm)) {
+            matches.push({ uri, name: info.name, artists: info.artists,
+                duration: getDisplayDuration(info.duration_ms )});
+        }
+    });
+
+    return matches.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 async function getTracksToInclude(include: string[], token: string): Promise<Map<string, any>> {
@@ -60,5 +73,18 @@ function fitsDurationCriteria(trackDuration: number, comparison: string,
         default:
             // don't use exact milliseconds, use displayed mm:ss instead for "equal" durations
             return getDisplayDuration(trackDuration) == desiredDisplay;
+    }
+}
+
+function matchesTitleCriteria(trackTitle: string, where: string, searchTerm: string): boolean {
+
+    switch(where) {
+        case 'starts':
+            return trackTitle.toLowerCase().startsWith(searchTerm);
+        case 'ends':
+            return trackTitle.toLowerCase().endsWith(searchTerm);
+        case 'contains':
+        default:
+            return trackTitle.toLowerCase().includes(searchTerm);
     }
 }

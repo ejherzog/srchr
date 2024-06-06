@@ -74,7 +74,7 @@ app.post('/title', async (req: Request, res: Response) => {
     const token = getTokenCookie(req);
     const user = await getUserInfo(token);
     const tracks = await titleSearch(token, req.body.where,
-        req.body.include, req.body.what );
+        req.body.what, req.body.include );
     res.render('results', {
         name: user.displayName,
         tracks: tracks

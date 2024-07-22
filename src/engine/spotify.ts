@@ -1,5 +1,6 @@
 import ky, { HTTPError, Input, Options } from "ky";
 import { formatDescription } from "./utils";
+import { Redis } from "ioredis";
 
 // export async function initializePublicSession(): Promise<string> {
 
@@ -28,18 +29,26 @@ import { formatDescription } from "./utils";
 
 // }
 
-export async function getUserDisplayName(token: string): Promise<string> {
-    const userInfo = await getUserInfo(token);
+export async function getUserDisplayName(token: string, redis: Redis): Promise<string> {
+    const userInfo = await getUserInfo(token, redis);
     return userInfo.displayName;
 }
 
-export async function getUserInfo(token: string): Promise<{ displayName: string, userId: string}> {
+export async function getUserInfo(token: string, redis: Redis): Promise<{ displayName: string, userId: string}> {
 
-    const userResponse: any = await ky.get('https://api.spotify.com/v1/me', {
-        headers: { 'Authorization': `Bearer ${token}`}
-    }).json();
-
-    return { displayName: userResponse['display_name'], userId: userResponse['id'] };
+    const userData = await redis.get(token);
+    if (userData) {
+        return JSON.parse(userData);
+    } else {
+        const userResponse: any = await ky.get('https://api.spotify.com/v1/me', {
+            headers: { 'Authorization': `Bearer ${token}`}
+        }).json();
+    
+        const response = { displayName: userResponse['display_name'], userId: userResponse['id'] };
+        await redis.set(token, JSON.stringify(response), "EX", 10);
+    
+        return response;
+    }
 }
 
 export async function getUserPlaylists(token: string) {

@@ -2,12 +2,13 @@
     <div class="container"><a class="navbar-brand" href="/">🎵 SongSrchr 🔎</a>
       <ul class="navbar-nav mr-auto">
         <li class="nav-item"><a class="nav-link" href="/about"><span>About</span></a></li>
-        <% if (typeof name == 'undefined') { %>
-          <li class="nav-item"><a class="nav-link" href="/login"><span>Login</span></a></li>
-        <% } else { %>
+        <% if (isLoggedIn) { %>
           <li class="nav-item"><a class="nav-link" href="/playlists"><span>Playlists</span></a></li>
           <li class="nav-item"><a class="nav-link" href="/search"><span>Search</span></a></li>
-          <li class="nav-item nav-link"><span>Hello, <%= name %>!</span></li>
+          <li class="nav-item"><a class="nav-link" href="/logout"><span>Logout, <% displayName %> </span></a></li>
+        <% } else { %>
+          
+          <li class="nav-item"><a class="nav-link" href="/login"><span>Login</span></a></li>
         <% } %>
     </div>
   </nav>

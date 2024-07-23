@@ -1,28 +1,33 @@
 import { Request, Response } from "express";
+import { Redis } from "ioredis";
 import querystring from "node:querystring";
 import { v4 as uuidv4, validate } from "uuid";
 import ky from "ky";
+import { Session, Token } from "../types/session";
+import { getUserInfo } from "../engine/spotify";
 
-const ONE_HOUR = 3600000;
+const redis: Redis = new Redis();
 
-export function getTokenCookie(req: Request) {
-    return req.cookies['user-token'];
+export async function getSessionInfo(req: Request) {
+    if (req.cookies['session-id']) {
+        const cachedDataString = await redis.get(req.cookies['session-id']);
+        if (cachedDataString) {
+            const cachedData = JSON.parse(cachedDataString);
+            if (cachedData.user) return { isLoggedIn: true, ...cachedData.user };
+            const user = await getUserInfo(cachedData.token.token);
+            return { isLoggedIn: true, ...user };
+        }
+    }
+    return { isLoggedIn: false };
 }
 
-// export function checkUserToken(req: Request, res: Response, next: NextFunction) {
-
-//     var userToken: string;
-//     var cookie = req.cookies['user-token'];
-//     if (cookie) {
-//         userToken = cookie;
-//         res.cookie('user-token', userToken, { expires: new Date(Date.now() + 3600), httpOnly: true, sameSite: 'strict' });
-//     }
-//     next();
-// }
+export function getTokenCookie(req: Request) {
+    return req.cookies['session-id'];
+}
 
 export function userLogin(req: Request, res: Response) {
 
-    if (req.cookies['user-token'] === undefined) {
+    if (req.cookies['session-id'] === undefined) {
         var state = uuidv4();
         var scope = 'user-read-private user-read-email playlist-read-private user-library-read playlist-modify-private playlist-modify-public';
     
@@ -35,9 +40,14 @@ export function userLogin(req: Request, res: Response) {
             state: state
         }));
     } else {
-        console.log("Already logged in");
-        res.redirect('/logged_in');
+        res.redirect('/about');
     }
+}
+
+export async function userLogout(req: Request, res: Response) {
+    res.clearCookie(req.cookies['session-id']);
+    await redis.del(req.cookies['session-id']);
+    res.redirect('/');
 }
 
 export async function authenticate(req: Request, res: Response) {
@@ -46,7 +56,8 @@ export async function authenticate(req: Request, res: Response) {
     if (validate(state)) {
         const code = req.query.code as string;
         const accessToken = await getAccessToken(code);
-        setCookie(res, accessToken.token, accessToken.expires_in);
+
+        createSession(res, accessToken);
         res.redirect('/playlists');
     } else {
         res.redirect('/about');
@@ -69,13 +80,18 @@ async function getAccessToken(code: string) {
             }
         }).json();
 
-    return {
-        token: tokenResponse['access_token'],
-        expires_in: parseInt(tokenResponse['expires_in']) * 1000
-    };
+    return new Token(tokenResponse['access_token'], parseInt(tokenResponse['expires_in']));
 }
 
-function setCookie(res: Response, token: string, expires_in?: number) {
-    const timeToAdd = expires_in || ONE_HOUR;
-    res.cookie('user-token', token, { expires: new Date(Date.now() + timeToAdd), httpOnly: true, sameSite: 'lax' });
+async function createSession(res: Response, token: Token) {
+
+    const sessionId = crypto.randomUUID();
+    res.cookie('session-id', sessionId, { 
+        expires: new Date(Date.now() + (token.expiresIn * 1000)), 
+        httpOnly: true, 
+        sameSite: 'lax'
+    });
+
+    const session = new Session(sessionId, token);
+    redis.set(sessionId, JSON.stringify(session), "EX", token.expiresIn);
 }

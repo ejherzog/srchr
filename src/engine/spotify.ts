@@ -1,6 +1,7 @@
 import ky, { HTTPError, Input, Options } from "ky";
 import { formatDescription } from "./utils";
-import { Redis } from "ioredis";
+import { User } from "../types/session";
+// import { retrieveUserInfo, cacheUserInfo } from "../cache/redis";
 
 // export async function initializePublicSession(): Promise<string> {
 
@@ -29,29 +30,20 @@ import { Redis } from "ioredis";
 
 // }
 
-export async function getUserDisplayName(token: string, redis: Redis): Promise<string> {
-    const userInfo = await getUserInfo(token, redis);
+export async function getUserDisplayName(token: string): Promise<string> {
+    const userInfo = await getUserInfo(token);
     return userInfo.displayName;
 }
 
-export async function getUserInfo(token: string, redis: Redis): Promise<{ displayName: string, userId: string}> {
+export async function getUserInfo(token: string): Promise<{ displayName: string, userId: string}> {
 
-    const userData = await redis.get(token);
-    if (userData) {
-        return JSON.parse(userData);
-    } else {
-        const userResponse: any = await ky.get('https://api.spotify.com/v1/me', {
-            headers: { 'Authorization': `Bearer ${token}`}
-        }).json();
+    const userResponse: any = await ky.get('https://api.spotify.com/v1/me', 
+        { headers: { 'Authorization': `Bearer ${token}`} }).json();
     
-        const response = { displayName: userResponse['display_name'], userId: userResponse['id'] };
-        await redis.set(token, JSON.stringify(response), "EX", 10);
-    
-        return response;
-    }
+    return new User(userResponse['display_name'], userResponse['id']);
 }
 
-export async function getUserPlaylists(token: string) {
+export async function getUserPlaylists(token: string, userId: string) {
 
     const responses: any[] = await getAllAuthRequest('https://api.spotify.com/v1/me/playlists', token);
 
@@ -66,7 +58,7 @@ export async function getUserPlaylists(token: string) {
             name: item.name,
             trackCount: item.tracks.total,
             description: formatDescription(item.description as string)
-        })
+        });
     });
 
     return playlists;

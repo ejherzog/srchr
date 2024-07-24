@@ -3,31 +3,35 @@ import { Redis } from "ioredis";
 import querystring from "node:querystring";
 import { v4 as uuidv4, validate } from "uuid";
 import ky from "ky";
-import { Session, Token } from "../types/session";
 import { getUserInfo } from "../engine/spotify";
 
 const redis: Redis = new Redis();
 
-export async function getSessionInfo(req: Request) {
+export async function getSessionInfo(req: Request, res: Response): Promise<SessionInfo> {
     if (req.cookies['session-id']) {
-        const cachedDataString = await redis.get(req.cookies['session-id']);
-        if (cachedDataString) {
-            const cachedData = JSON.parse(cachedDataString);
-            if (cachedData.user) return { isLoggedIn: true, ...cachedData.user };
-            const user = await getUserInfo(cachedData.token.token);
-            return { isLoggedIn: true, ...user };
+        const cachedSession = await redis.get(req.cookies['session-id']);
+        console.log("WHY IS THERE NO CACHED DATA?");
+        console.log(cachedSession);
+        if (cachedSession) {
+            return new SessionInfo(JSON.parse(cachedSession));
+        } else {
+            // there is a session ID cookie, but no cached session data
+            console.log("delete cookie?");
+            console.log(req.cookies['session-id']);
+            res.clearCookie(req.cookies['session-id']);
+            return new SessionInfo();
         }
     }
-    return { isLoggedIn: false };
+    // there is no session ID cookie set
+    return new SessionInfo();
 }
 
-export function getTokenCookie(req: Request) {
-    return req.cookies['session-id'];
-}
+export async function userLogin(req: Request, res: Response) {
 
-export function userLogin(req: Request, res: Response) {
+    const sessionInfo = await getSessionInfo(req, res);
 
-    if (req.cookies['session-id'] === undefined) {
+    if (!sessionInfo.isLoggedIn) {
+        console.log("confirmed not logged in");
         var state = uuidv4();
         var scope = 'user-read-private user-read-email playlist-read-private user-library-read playlist-modify-private playlist-modify-public';
     
@@ -40,24 +44,24 @@ export function userLogin(req: Request, res: Response) {
             state: state
         }));
     } else {
-        res.redirect('/about');
+        res.redirect('/playlists');
     }
 }
 
 export async function userLogout(req: Request, res: Response) {
     res.clearCookie(req.cookies['session-id']);
     await redis.del(req.cookies['session-id']);
-    res.redirect('/');
 }
 
 export async function authenticate(req: Request, res: Response) {
 
+    console.log("got auth redirect");
     const state = req.query.state as string;
     if (validate(state)) {
         const code = req.query.code as string;
         const accessToken = await getAccessToken(code);
 
-        createSession(res, accessToken);
+        await createSession(res, accessToken);
         res.redirect('/playlists');
     } else {
         res.redirect('/about');
@@ -92,6 +96,65 @@ async function createSession(res: Response, token: Token) {
         sameSite: 'lax'
     });
 
-    const session = new Session(sessionId, token);
-    redis.set(sessionId, JSON.stringify(session), "EX", token.expiresIn);
+    console.log("new session ID");
+    console.log(sessionId);
+    const user = await getUserInfo(token.token);
+    console.log(user);
+    const session = new Session(sessionId, token, user);
+    console.log(session);
+
+    await redis.set(sessionId, JSON.stringify(session), "EX", token.expiresIn);
+
+    console.log("cached");
+    console.log(await redis.get(sessionId));
+}
+
+const ONE_HOUR = 3600000;
+
+export class Token {
+    token: string;
+    expiresIn: number;
+
+    constructor(token: string, expires_in?: number) {
+        this.token = token;
+        this.expiresIn = expires_in ?? ONE_HOUR;
+    }
+}
+
+export class User {
+    displayName: string;
+    userId: string;
+
+    constructor(displayName: string, userId: string) {
+        this.displayName = displayName;
+        this.userId = userId;
+    }
+}
+
+export class Session {
+    sessionId: string;
+    token: string;
+    tokenExpiry: number;
+    displayName: string;
+    userId: string;
+
+    constructor(sessionId: string, accessToken: Token, user: User) {
+        this.sessionId = sessionId;
+        this.token = accessToken.token;
+        this.tokenExpiry = accessToken.expiresIn;
+        this.displayName = user.displayName;
+        this.userId = user.userId;
+    }
+}
+
+export class SessionInfo {
+    isLoggedIn: boolean = false;
+    session?: Session;
+
+    constructor(session?: Session) {
+        if (session) {
+            this.isLoggedIn = true;
+            this.session = session;
+        }
+    }
 }

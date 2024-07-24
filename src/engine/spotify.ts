@@ -1,6 +1,7 @@
-import ky, { HTTPError, Input, Options } from "ky";
+import ky, { Input, Options } from "ky";
 import { formatDescription } from "./utils";
-import { User } from "../types/session";
+import { User } from "../middleware/session";
+
 // import { retrieveUserInfo, cacheUserInfo } from "../cache/redis";
 
 // export async function initializePublicSession(): Promise<string> {
@@ -35,15 +36,17 @@ export async function getUserDisplayName(token: string): Promise<string> {
     return userInfo.displayName;
 }
 
-export async function getUserInfo(token: string): Promise<{ displayName: string, userId: string}> {
+export async function getUserInfo(token: string): Promise<User> {
 
+    console.log(token);
     const userResponse: any = await ky.get('https://api.spotify.com/v1/me', 
         { headers: { 'Authorization': `Bearer ${token}`} }).json();
     
+    console.log(userResponse);
     return new User(userResponse['display_name'], userResponse['id']);
 }
 
-export async function getUserPlaylists(token: string, userId: string) {
+export async function getUserPlaylists(token: string) {
 
     const responses: any[] = await getAllAuthRequest('https://api.spotify.com/v1/me/playlists', token);
 

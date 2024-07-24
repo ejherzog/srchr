@@ -4,8 +4,8 @@ import path from "path";
 import bodyParser from "body-parser";
 import { fileURLToPath } from 'url';
 import cookieParser from "cookie-parser";
-import { authenticate, getSessionInfo, getTokenCookie, userLogin, userLogout } from "./middleware/session";
-import { getUserInfo, getUserPlaylists } from "./engine/spotify";
+import { authenticate, getSessionInfo, Session, userLogin, userLogout } from "./middleware/session";
+import { getUserPlaylists } from "./engine/spotify";
 import { sortByTitle } from "./engine/utils";
 import { durationSearch, titleSearch } from "./engine/search";
 import { createNewPlaylist } from "./engine/playlists";
@@ -23,17 +23,20 @@ app.use(cors());
 app.use(cookieParser());
 
 app.get('/', async (req: Request, res: Response) => {
-    const sessionInfo = await getSessionInfo(req);
+    const sessionInfo = await getSessionInfo(req, res);
     console.log(sessionInfo);
     res.render('index', sessionInfo);
 });
 
-app.get('/login', (req: Request, res: Response) => {
-    userLogin(req, res);
+app.get('/login', async (req: Request, res: Response) => {
+    console.log("trying to log in");
+    await userLogin(req, res);
 });
 
 app.get('/logout', (req: Request, res: Response) => {
+    console.log("logging out");
     userLogout(req, res);
+    res.redirect('/');
 });
 
 app.get('/auth', async (req: Request, res: Response) => {
@@ -41,56 +44,56 @@ app.get('/auth', async (req: Request, res: Response) => {
 });
 
 app.get('/playlists', async (req: Request, res: Response) => {
-    const token = getTokenCookie(req);
-    const user = await getUserInfo(token);
-    const playlistData = await getUserPlaylists(token, user.userId);
+    const sessionInfo = await getSessionInfo(req, res);
+    console.log(sessionInfo);
+    if (!sessionInfo.isLoggedIn) res.redirect('/');
+
+    const playlistData = await getUserPlaylists(sessionInfo.session!.token);
     res.render('playlists', {
-        name: user.displayName,
+        ...sessionInfo,
         playlists: sortByTitle(playlistData)
     });
 });
 
 app.get('/search', async (req: Request, res: Response) => {
-    const token = getTokenCookie(req);
-    const user = await getUserInfo(token);
-    res.render('search', {
-        name: user.displayName
-    });
-});
+    const sessionInfo = await getSessionInfo(req, res);
+    if (!sessionInfo.isLoggedIn) res.redirect('/');
 
-app.get('/about', async (req: Request, res: Response) => {
-    const sessionInfo = await getSessionInfo(req);
-    res.render('about', sessionInfo);
+    res.render('search', sessionInfo);
 });
 
 app.post('/title', async (req: Request, res: Response) => {
-    const token = getTokenCookie(req);
-    const user = await getUserInfo(token);
-    const tracks = await titleSearch(token, req.body.where,
-        req.body.what, req.body.include );
+    const sessionInfo = await getSessionInfo(req, res);
+    if (!sessionInfo.isLoggedIn) res.redirect('/');
+        
+    const tracks = await titleSearch(sessionInfo.session!.token, 
+        req.body.where, req.body.what, req.body.include);
     res.render('results', {
-        name: user.displayName,
+        ...sessionInfo,
         tracks: tracks
     });
 });
 
 app.post('/duration', async (req: Request, res: Response) => {
-    const token = getTokenCookie(req);
-    const user = await getUserInfo(token);
-    const tracks = await durationSearch(token, req.body.comparison,
-        req.body.include, req.body.min, req.body.sec );
+    const sessionInfo = await getSessionInfo(req, res);
+    if (!sessionInfo.isLoggedIn) res.redirect('/');
+        
+    const tracks = await durationSearch(sessionInfo.session!.token, 
+        req.body.comparison, req.body.include, req.body.min, req.body.sec);
     res.render('results', {
-        name: user.displayName,
+        ...sessionInfo,
         tracks: tracks
     });
 });
 
 app.post('/create', async (req: Request, res: Response) => {
-    const token = getTokenCookie(req);
-    const user = await getUserInfo(token);
-    const playlistUrl = await createNewPlaylist(req.body, user.userId, token);
+    const sessionInfo = await getSessionInfo(req, res);
+    if (!sessionInfo.isLoggedIn) res.redirect('/');
+
+    const playlistUrl = await createNewPlaylist(req.body, 
+        sessionInfo.session!.userId, sessionInfo.session!.token);
     res.render('success', {
-        name: user.displayName,
+        ...sessionInfo,
         playlistName: req.body.playlistName, 
         playlistUrl
     });
@@ -101,13 +104,3 @@ app.use(express.static(__dirname + '/public'));
 app.listen(process.env.PORT, () => {
     console.log(`[server]: Server is running at http://localhost:${process.env.PORT}`);
 });
-
-async function nameIfLoggedIn(req: Request) {
-
-    var token = req.cookies['user-token'];
-    if (token) {
-        return await getUserInfo(token);
-    } else {
-        return undefined;
-    }
-}

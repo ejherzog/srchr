@@ -2,47 +2,11 @@ import ky, { Input, Options } from "ky";
 import { formatDescription } from "./utils";
 import { User } from "../middleware/session";
 
-// import { retrieveUserInfo, cacheUserInfo } from "../cache/redis";
-
-// export async function initializePublicSession(): Promise<string> {
-
-//     const tokenParams = new URLSearchParams();
-//     tokenParams.append('grant_type', 'client_credentials');
-//     tokenParams.append('client_id', process.env.SPOTIFY_CLIENT_ID!);
-//     tokenParams.append('client_secret', process.env.SPOTIFY_CLIENT_SECRET!);
-
-//     const tokenResponse: any = await ky.post('https://accounts.spotify.com/api/token', {body: tokenParams}).json();
-
-//     return tokenResponse['access_token'];
-// }
-
-// export async function getPopularPlaylists(limit: number, token: string) {
-
-//     const params = new URLSearchParams();
-//     params.append('locale', 'en_US');
-//     params.append('limit', limit <= 10 ? `${limit}` : '10');
-//     params.append('offset', '0');
-
-//     const response = await ky.post('https://api.spotify.com/v1/browse/featured-playlists',
-//         { body: params, headers: {
-//             'Authorization': `Bearer ${token}`
-//         }}
-//     ).json();
-
-// }
-
-export async function getUserDisplayName(token: string): Promise<string> {
-    const userInfo = await getUserInfo(token);
-    return userInfo.displayName;
-}
-
 export async function getUserInfo(token: string): Promise<User> {
 
-    console.log(token);
     const userResponse: any = await ky.get('https://api.spotify.com/v1/me', 
         { headers: { 'Authorization': `Bearer ${token}`} }).json();
     
-    console.log(userResponse);
     return new User(userResponse['display_name'], userResponse['id']);
 }
 

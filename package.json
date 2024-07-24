@@ -29,13 +29,11 @@
   "dependencies": {
     "@dotenvx/dotenvx": "^0.37.1",
     "body-parser": "^1.20.2",
-    "common-es": "^1.0.1",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
     "ejs": "^3.1.10",
     "express": "^4.19.2",
-    "formdata-node": "^6.0.3",
+    "ioredis": "^5.4.1",
     "ky": "^1.2.4",
     "pretty-ms": "^9.0.0",
     "uuid": "^9.0.1"
@@ -46,7 +44,6 @@
     "@types/express": "^4.17.21",
     "@types/node": "^20.12.8",
     "@types/uuid": "^9.0.8",
-    "tsx": "^4.9.0",
-    "typescript": "^5.4.5"
+    "tsx": "^4.9.0"
   }
 }

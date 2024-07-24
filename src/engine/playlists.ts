@@ -1,3 +1,4 @@
+import { Session } from "../middleware/session";
 import { getAuthRequest, postAuthRequest } from "./spotify";
 
 const CHUNK_SIZE = 50;
@@ -53,13 +54,13 @@ export async function getFeaturedPlaylistsArray(token: string) {
 }
 
 export async function createNewPlaylist(requestBody: { playlistName: string, description: string, tracks: string[]; }, 
-    userId: string, token: string): Promise<string> {
+    session: Session): Promise<string> {
 
     // create new playlist: user_id, name, description, public = false; returns id
-    const createUri = `https://api.spotify.com/v1/users/${userId}/playlists`
+    const createUri = `https://api.spotify.com/v1/users/${session.userId}/playlists`
     const playlistInfo = { name: requestBody.playlistName, description: requestBody.description, public: false };
 
-    const playlistResponse: any = await postAuthRequest(createUri, playlistInfo, token);
+    const playlistResponse: any = await postAuthRequest(createUri, playlistInfo, session.token);
     const playlistId = playlistResponse.id;
 
     // split trackUris into size 50 chunks
@@ -68,7 +69,7 @@ export async function createNewPlaylist(requestBody: { playlistName: string, des
         const chunk = tracksToAdd.slice(i, i + CHUNK_SIZE);
 
         // for each chunk of trackUris, add tracks to newly created playlist
-        await addTracksToPlaylist(playlistId, chunk, token);
+        await addTracksToPlaylist(playlistId, chunk, session.token);
     }
 
     // return playlistUrl

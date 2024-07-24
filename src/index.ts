@@ -4,7 +4,7 @@ import path from "path";
 import bodyParser from "body-parser";
 import { fileURLToPath } from 'url';
 import cookieParser from "cookie-parser";
-import { authenticate, getSessionInfo, Session, userLogin, userLogout } from "./middleware/session";
+import { authenticate, getSessionInfo, userLogin, userLogout } from "./middleware/session";
 import { getUserPlaylists } from "./engine/spotify";
 import { sortByTitle } from "./engine/utils";
 import { durationSearch, titleSearch } from "./engine/search";
@@ -24,33 +24,29 @@ app.use(cookieParser());
 
 app.get('/', async (req: Request, res: Response) => {
     const sessionInfo = await getSessionInfo(req, res);
-    console.log(sessionInfo);
-    res.render('index', sessionInfo);
+    res.render('index', sessionInfo.displayData);
 });
 
 app.get('/login', async (req: Request, res: Response) => {
-    console.log("trying to log in");
     await userLogin(req, res);
-});
-
-app.get('/logout', (req: Request, res: Response) => {
-    console.log("logging out");
-    userLogout(req, res);
-    res.redirect('/');
 });
 
 app.get('/auth', async (req: Request, res: Response) => {
     await authenticate(req, res);
 });
 
+app.get('/logout', (req: Request, res: Response) => {
+    userLogout(req, res);
+    res.redirect('/');
+});
+
 app.get('/playlists', async (req: Request, res: Response) => {
     const sessionInfo = await getSessionInfo(req, res);
-    console.log(sessionInfo);
     if (!sessionInfo.isLoggedIn) res.redirect('/');
 
     const playlistData = await getUserPlaylists(sessionInfo.session!.token);
     res.render('playlists', {
-        ...sessionInfo,
+        ...sessionInfo.displayData,
         playlists: sortByTitle(playlistData)
     });
 });
@@ -59,7 +55,7 @@ app.get('/search', async (req: Request, res: Response) => {
     const sessionInfo = await getSessionInfo(req, res);
     if (!sessionInfo.isLoggedIn) res.redirect('/');
 
-    res.render('search', sessionInfo);
+    res.render('search', sessionInfo.displayData);
 });
 
 app.post('/title', async (req: Request, res: Response) => {
@@ -69,7 +65,7 @@ app.post('/title', async (req: Request, res: Response) => {
     const tracks = await titleSearch(sessionInfo.session!.token, 
         req.body.where, req.body.what, req.body.include);
     res.render('results', {
-        ...sessionInfo,
+        ...sessionInfo.displayData,
         tracks: tracks
     });
 });
@@ -81,7 +77,7 @@ app.post('/duration', async (req: Request, res: Response) => {
     const tracks = await durationSearch(sessionInfo.session!.token, 
         req.body.comparison, req.body.include, req.body.min, req.body.sec);
     res.render('results', {
-        ...sessionInfo,
+        ...sessionInfo.displayData,
         tracks: tracks
     });
 });
@@ -90,10 +86,9 @@ app.post('/create', async (req: Request, res: Response) => {
     const sessionInfo = await getSessionInfo(req, res);
     if (!sessionInfo.isLoggedIn) res.redirect('/');
 
-    const playlistUrl = await createNewPlaylist(req.body, 
-        sessionInfo.session!.userId, sessionInfo.session!.token);
+    const playlistUrl = await createNewPlaylist(req.body, sessionInfo.session!);
     res.render('success', {
-        ...sessionInfo,
+        ...sessionInfo.displayData,
         playlistName: req.body.playlistName, 
         playlistUrl
     });

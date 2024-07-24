@@ -10,16 +10,11 @@ const redis: Redis = new Redis();
 export async function getSessionInfo(req: Request, res: Response): Promise<SessionInfo> {
     if (req.cookies['session-id']) {
         const cachedSession = await redis.get(req.cookies['session-id']);
-        console.log("WHY IS THERE NO CACHED DATA?");
-        console.log(cachedSession);
         if (cachedSession) {
             return new SessionInfo(JSON.parse(cachedSession));
         } else {
             // there is a session ID cookie, but no cached session data
-            console.log("delete cookie?");
-            console.log(req.cookies['session-id']);
             res.clearCookie(req.cookies['session-id']);
-            return new SessionInfo();
         }
     }
     // there is no session ID cookie set
@@ -31,7 +26,6 @@ export async function userLogin(req: Request, res: Response) {
     const sessionInfo = await getSessionInfo(req, res);
 
     if (!sessionInfo.isLoggedIn) {
-        console.log("confirmed not logged in");
         var state = uuidv4();
         var scope = 'user-read-private user-read-email playlist-read-private user-library-read playlist-modify-private playlist-modify-public';
     
@@ -55,7 +49,6 @@ export async function userLogout(req: Request, res: Response) {
 
 export async function authenticate(req: Request, res: Response) {
 
-    console.log("got auth redirect");
     const state = req.query.state as string;
     if (validate(state)) {
         const code = req.query.code as string;
@@ -96,17 +89,10 @@ async function createSession(res: Response, token: Token) {
         sameSite: 'lax'
     });
 
-    console.log("new session ID");
-    console.log(sessionId);
     const user = await getUserInfo(token.token);
-    console.log(user);
+    
     const session = new Session(sessionId, token, user);
-    console.log(session);
-
     await redis.set(sessionId, JSON.stringify(session), "EX", token.expiresIn);
-
-    console.log("cached");
-    console.log(await redis.get(sessionId));
 }
 
 const ONE_HOUR = 3600000;
@@ -156,5 +142,12 @@ export class SessionInfo {
             this.isLoggedIn = true;
             this.session = session;
         }
+    }
+
+    get displayData() {
+        return { 
+            isLoggedIn: this.isLoggedIn, 
+            displayName: this.session?.displayName 
+        };
     }
 }

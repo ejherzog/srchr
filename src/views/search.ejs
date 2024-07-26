@@ -6,8 +6,7 @@
     <div class="container mt-2">
         <section class="mt-5 p-1">
             <h4>Search By Title</h4>
-            <p>This form allows you search for a specific string of characters in the title of the songs in your library.</p>
-            <p>You can specify that the song title must start with or end with the search term or you can choose 'contain' which will look anywhere in the song title.</p>
+            <p><i>Search for song titles that start with, end with, or contain a specific string of character.</i></p>
             <form action="/title" method="POST">
                 <div class="row g-3 align-items-center">
                     <div class="col-auto">
@@ -32,7 +31,7 @@
                     </div>
                     <div class="col-auto">
                       <span id="searchTermHelpInline" class="form-text">
-                        Must be 1-20 characters long.
+                        <i>Must be 1-20 characters long.</i>
                       </span>
                     </div>
                   </div>
@@ -44,7 +43,7 @@
         <hr>
         <section class="mt-5 p-1">
             <h4>Search By Duration</h4>
-            <p>This form allows you search for songs that are more or less than a specific amount of time as well as exactly equal to a specified length of time.</p>
+            <p><i>Search for songs that are more than, less than, or equal to a specified amount of time.</i></p>
             <form action="/duration" method="POST">
                 <div class="row g-3 align-items-center">
                     <div class="col-auto">
@@ -69,7 +68,7 @@
                     </div>
                     <div class="col-auto">
                       <span id="minutesHelpInline" class="form-text">
-                        Number of minutes. Can be 0 or any positive integer.
+                      <i>Number of minutes. Can be 0 or any positive integer.</i>
                       </span>
                     </div>
                   </div>
@@ -83,7 +82,7 @@
                     </div>
                     <div class="col-auto">
                       <span id="secondsHelpInline" class="form-text">
-                        Must be between 0 and 59 seconds.
+                      <i>Must be between 0 and 59 seconds.</i>
                       </span>
                     </div>
                   </div>

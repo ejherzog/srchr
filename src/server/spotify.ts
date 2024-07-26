@@ -1,6 +1,7 @@
 import ky, { Input, Options } from "ky";
 import { formatDescription } from "./utils";
-import { User } from "../middleware/session";
+import { Session, User } from "../util/types";
+import { retrievePlaylists, storePlaylists } from "../util/cache";
 
 export async function getUserInfo(token: string): Promise<User> {
 
@@ -10,9 +11,12 @@ export async function getUserInfo(token: string): Promise<User> {
     return new User(userResponse['display_name'], userResponse['id']);
 }
 
-export async function getUserPlaylists(token: string) {
+export async function getUserPlaylists(session: Session) {
 
-    const responses: any[] = await getAllAuthRequest('https://api.spotify.com/v1/me/playlists', token);
+    const cachedPlaylists = await retrievePlaylists(session.userId);
+    if (cachedPlaylists) return cachedPlaylists;
+
+    const responses: any[] = await getAllAuthRequest('https://api.spotify.com/v1/me/playlists', session.token);
 
     const rawData: any[] = [];
     responses.forEach(response => {
@@ -28,6 +32,7 @@ export async function getUserPlaylists(token: string) {
         });
     });
 
+    await storePlaylists(playlists, session.userId);
     return playlists;
 }
 

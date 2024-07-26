@@ -1,13 +1,14 @@
+import { Session } from "../util/session";
 import { getFeaturedPlaylistsTracks, getNewReleaseTracks, getUsersAlbumTracks, getUsersPlaylistTracks, getUsersSavedTracks } from "./tracks";
 import { getDisplayDuration } from "./utils";
 
-export async function durationSearch(token: string, comparison: string,
+export async function durationSearch(session: Session, comparison: string,
     include: string[], minutes: string, seconds: string) {
 
     // validate input and translate to search criteria
     const duration = (parseInt(seconds) + (60 * parseInt(minutes))) * 1000;
 
-    const allTracksMap = await getTracksToInclude(include, token);
+    const allTracksMap = await getTracksToInclude(include, session);
     // search through tracks
     var matches: any[] = [];
 
@@ -23,10 +24,10 @@ export async function durationSearch(token: string, comparison: string,
     return matches.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export async function titleSearch(token: string, where: string, what: string, include: string[]) {
+export async function titleSearch(session: Session, where: string, what: string, include: string[]) {
 
     const searchTerm = what.toLowerCase();
-    const allTracksMap = await getTracksToInclude(include, token);
+    const allTracksMap = await getTracksToInclude(include, session);
 
     var matches: any[] = [];
 
@@ -40,15 +41,15 @@ export async function titleSearch(token: string, where: string, what: string, in
     return matches.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-async function getTracksToInclude(include: string[], token: string): Promise<Map<string, any>> {
+async function getTracksToInclude(include: string[], session: Session): Promise<Map<string, any>> {
 
     // build track list based on what user wants to include
     var promiseArray: Promise<Map<string, any>>[] = [];
-    if (include.includes('featured')) promiseArray.push(getFeaturedPlaylistsTracks(token));
-    if (include.includes('playlists')) promiseArray.push(getUsersPlaylistTracks(token));
-    if (include.includes('albums')) promiseArray.push(getUsersAlbumTracks(token));
-    if (include.includes('tracks')) promiseArray.push(getUsersSavedTracks(token));
-    if (include.includes('new')) promiseArray.push(getNewReleaseTracks(token));
+    if (include.includes('featured')) promiseArray.push(getFeaturedPlaylistsTracks(session.token));
+    if (include.includes('playlists')) promiseArray.push(getUsersPlaylistTracks(session.token, session.userId));
+    if (include.includes('albums')) promiseArray.push(getUsersAlbumTracks(session.token));
+    if (include.includes('tracks')) promiseArray.push(getUsersSavedTracks(session.token));
+    if (include.includes('new')) promiseArray.push(getNewReleaseTracks(session.token));
 
     const resolvedArray = await Promise.all(promiseArray);
     var trackMapArray: Map<string, any>[] = [];

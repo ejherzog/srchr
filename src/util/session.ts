@@ -3,7 +3,7 @@ import { Redis } from "ioredis";
 import querystring from "node:querystring";
 import { v4 as uuidv4, validate } from "uuid";
 import ky from "ky";
-import { getUserInfo } from "../engine/spotify";
+import { getUserInfo } from "../server/spotify";
 
 const redis: Redis = new Redis();
 

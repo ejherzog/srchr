@@ -4,11 +4,11 @@ import path from "path";
 import bodyParser from "body-parser";
 import { fileURLToPath } from 'url';
 import cookieParser from "cookie-parser";
-import { authenticate, getSessionInfo, userLogin, userLogout } from "./middleware/session";
-import { getUserPlaylists } from "./engine/spotify";
-import { sortByTitle } from "./engine/utils";
-import { durationSearch, titleSearch } from "./engine/search";
-import { createNewPlaylist } from "./engine/playlists";
+import { authenticate, getSessionInfo, userLogin, userLogout } from "./util/session";
+import { getUserPlaylists } from "./server/spotify";
+import { sortByTitle } from "./server/utils";
+import { durationSearch, titleSearch } from "./server/search";
+import { createNewPlaylist } from "./server/playlists";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -59,11 +59,17 @@ app.get('/search', async (req: Request, res: Response) => {
 });
 
 app.post('/title', async (req: Request, res: Response) => {
+    var startTime = performance.now();
+
     const sessionInfo = await getSessionInfo(req, res);
     if (!sessionInfo.isLoggedIn) res.redirect('/');
         
-    const tracks = await titleSearch(sessionInfo.session!.token, 
+    const tracks = await titleSearch(sessionInfo.session!, 
         req.body.where, req.body.what, req.body.include);
+
+    var endTime = performance.now();
+    console.log(`Call to title search took ${endTime - startTime} milliseconds`);
+    
     res.render('results', {
         ...sessionInfo.displayData,
         tracks: tracks
@@ -71,11 +77,17 @@ app.post('/title', async (req: Request, res: Response) => {
 });
 
 app.post('/duration', async (req: Request, res: Response) => {
+    var startTime = performance.now();
+
     const sessionInfo = await getSessionInfo(req, res);
     if (!sessionInfo.isLoggedIn) res.redirect('/');
         
-    const tracks = await durationSearch(sessionInfo.session!.token, 
+    const tracks = await durationSearch(sessionInfo.session!, 
         req.body.comparison, req.body.include, req.body.min, req.body.sec);
+
+    var endTime = performance.now();
+    console.log(`Call to duration search took ${endTime - startTime} milliseconds`);
+    
     res.render('results', {
         ...sessionInfo.displayData,
         tracks: tracks

@@ -1,4 +1,4 @@
-import { Session } from "../middleware/session";
+import { Session } from "../util/session";
 import { getAuthRequest, postAuthRequest } from "./spotify";
 
 const CHUNK_SIZE = 50;

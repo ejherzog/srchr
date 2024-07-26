@@ -1,3 +1,4 @@
+import { ListType, retrieveTracks, storeTracks } from "../util/cache";
 import { getNewReleaseAlbumsArray, getUsersAlbumArray } from "./albums";
 import { getFeaturedPlaylistsArray, getUsersPlaylistArray } from "./playlists";
 import { getAuthRequest } from "./spotify";
@@ -58,6 +59,10 @@ export async function getUsersAlbumTracks(token: string): Promise<Map<string, an
 
 export async function getNewReleaseTracks(token: string): Promise<Map<string, any>> {
 
+    console.log("get new releases???");
+    const cachedTrackMap = await retrieveTracks(ListType.NewReleases);
+    if (cachedTrackMap) return cachedTrackMap;
+
     const albumTracks = await getNewReleaseAlbumsArray(token);
 
     const trackMap = new Map<string, any>();
@@ -78,19 +83,20 @@ export async function getNewReleaseTracks(token: string): Promise<Map<string, an
         });
     }
 
+    await storeTracks(ListType.NewReleases, trackMap);
     return trackMap;
 }
 
-export async function getUsersPlaylistTracks(token: string, playlistHrefs: string[]): Promise<Map<string, any>>;
-export async function getUsersPlaylistTracks(token: string): Promise<Map<string, any>>;
+export async function getUsersPlaylistTracks(token: string, userId: string, playlistHrefs: string[]): Promise<Map<string, any>>;
+export async function getUsersPlaylistTracks(token: string, userId: string): Promise<Map<string, any>>;
 
-export async function getUsersPlaylistTracks(token: string, playlistHrefs?: string[]): Promise<Map<string, any>> {
+export async function getUsersPlaylistTracks(token: string, userId: string, playlistHrefs?: string[]): Promise<Map<string, any>> {
 
     if (!playlistHrefs) {
         playlistHrefs = await getUsersPlaylistArray(token);
     }
 
-    return await getTracksFromPlaylistLinks(token, playlistHrefs);
+    return await getTracksFromPlaylistLinks(token, playlistHrefs, userId);
 }
 
 export async function getFeaturedPlaylistsTracks(token: string, playlistHrefs: string[]): Promise<Map<string, any>>;
@@ -105,7 +111,7 @@ export async function getFeaturedPlaylistsTracks(token: string, playlistHrefs?: 
     return await getTracksFromPlaylistLinks(token, playlistHrefs);
 }
 
-async function getTracksFromPlaylistLinks(token: string, playlistHrefs: string[]): Promise<Map<string, any>> {
+async function getTracksFromPlaylistLinks(token: string, playlistHrefs: string[], userId?: string): Promise<Map<string, any>> {
 
     const trackMap = new Map<string, any>();
     var latestResponse: any = {};

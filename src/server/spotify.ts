@@ -1,6 +1,6 @@
 import ky, { Input, Options } from "ky";
 import { formatDescription } from "./utils";
-import { User } from "../middleware/session";
+import { User } from "../util/session";
 
 export async function getUserInfo(token: string): Promise<User> {
 

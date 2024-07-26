@@ -9,6 +9,7 @@ import { getUserPlaylists } from "./server/spotify";
 import { sortByTitle } from "./server/utils";
 import { durationSearch, titleSearch } from "./server/search";
 import { createNewPlaylist } from "./server/playlists";
+import { Sources } from "./util/types";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,7 +45,7 @@ app.get('/playlists', async (req: Request, res: Response) => {
     const sessionInfo = await getSessionInfo(req, res);
     if (!sessionInfo.isLoggedIn) res.redirect('/');
 
-    const playlistData = await getUserPlaylists(sessionInfo.session!.token);
+    const playlistData = await getUserPlaylists(sessionInfo.session!);
     res.render('playlists', {
         ...sessionInfo.displayData,
         playlists: sortByTitle(playlistData)
@@ -54,21 +55,19 @@ app.get('/playlists', async (req: Request, res: Response) => {
 app.get('/search', async (req: Request, res: Response) => {
     const sessionInfo = await getSessionInfo(req, res);
     if (!sessionInfo.isLoggedIn) res.redirect('/');
-
-    res.render('search', sessionInfo.displayData);
+    
+    res.render('search', {
+        ...sessionInfo.displayData,
+        Sources
+    });
 });
 
 app.post('/title', async (req: Request, res: Response) => {
-    var startTime = performance.now();
-
     const sessionInfo = await getSessionInfo(req, res);
     if (!sessionInfo.isLoggedIn) res.redirect('/');
         
     const tracks = await titleSearch(sessionInfo.session!, 
         req.body.where, req.body.what, req.body.include);
-
-    var endTime = performance.now();
-    console.log(`Call to title search took ${endTime - startTime} milliseconds`);
     
     res.render('results', {
         ...sessionInfo.displayData,
@@ -77,16 +76,11 @@ app.post('/title', async (req: Request, res: Response) => {
 });
 
 app.post('/duration', async (req: Request, res: Response) => {
-    var startTime = performance.now();
-
     const sessionInfo = await getSessionInfo(req, res);
     if (!sessionInfo.isLoggedIn) res.redirect('/');
         
     const tracks = await durationSearch(sessionInfo.session!, 
         req.body.comparison, req.body.include, req.body.min, req.body.sec);
-
-    var endTime = performance.now();
-    console.log(`Call to duration search took ${endTime - startTime} milliseconds`);
     
     res.render('results', {
         ...sessionInfo.displayData,

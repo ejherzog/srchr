@@ -1,36 +1,31 @@
 import { Redis } from "ioredis";
+import { TrackListType, ONE_HOUR } from "./types";
 
 const redis: Redis = new Redis();
 
-export async function storeTracks(type: ListType, trackData: Map<string, any>, userId?: string) {
-
-    console.log("attempting to use replacer thing");
-    const value = JSON.stringify(trackData, replacer);
-    console.log("storing in cache");
-    await redis.set(buildKey(type, userId), value);
+export async function storePlaylists(playlists: any[], userId: string) {
+    await redis.set(`${userId}_allplaylists`, JSON.stringify(playlists));
 }
 
-export async function retrieveTracks(type: ListType, userId?: string): Promise<Map<string, any> | undefined> {
-
-    const cachedDataString = await redis.get(buildKey(type, userId));
-
-    if (cachedDataString) {
-        console.log("cache hit");
-        return JSON.parse(cachedDataString, reviver);
-    }
+export async function retrievePlaylists(userId: string) {
+    const cachedDataString = await redis.get(`${userId}_allplaylists`);
+    if (cachedDataString) return JSON.parse(cachedDataString);
     return undefined;
 }
 
-export enum ListType {
-    PopularPlaylists = 'popular',
-    NewReleases = 'new_releases',
-    UserPlaylists = 'playlists',
-    UserAlbums = 'albums',
-    UserSongs = 'songs'
+export async function storeTracks(type: TrackListType, trackData: Map<string, any>, userId?: string) {
+    await redis.set(buildKey(type, userId), JSON.stringify(trackData, replacer), "EX", ONE_HOUR);
 }
 
-function buildKey(type: ListType, userId?: string) {
-    const key = userId ? `${userId}:${type}` : type;
+export async function retrieveTracks(type: TrackListType, userId?: string): Promise<Map<string, any> | undefined> {
+
+    const cachedDataString = await redis.get(buildKey(type, userId));
+    if (cachedDataString) return JSON.parse(cachedDataString, reviver);
+    return undefined;
+}
+
+function buildKey(type: TrackListType, userId?: string) {
+    const key = userId ? `${userId}_${type.id}` : type.id;
     return key;
 }
 
@@ -53,4 +48,4 @@ function reviver(key: string, value: any) {
         }
     }
     return value;
-  }
+}

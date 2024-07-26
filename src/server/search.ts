@@ -1,4 +1,4 @@
-import { Session } from "../util/session";
+import { Session } from "../util/types";
 import { getFeaturedPlaylistsTracks, getNewReleaseTracks, getUsersAlbumTracks, getUsersPlaylistTracks, getUsersSavedTracks } from "./tracks";
 import { getDisplayDuration } from "./utils";
 
@@ -45,10 +45,11 @@ async function getTracksToInclude(include: string[], session: Session): Promise<
 
     // build track list based on what user wants to include
     var promiseArray: Promise<Map<string, any>>[] = [];
+    if (include.includes('playlists')) promiseArray.push(getUsersPlaylistTracks(session));
+    if (include.includes('albums')) promiseArray.push(getUsersAlbumTracks(session));
+    if (include.includes('tracks')) promiseArray.push(getUsersSavedTracks(session));
+
     if (include.includes('featured')) promiseArray.push(getFeaturedPlaylistsTracks(session.token));
-    if (include.includes('playlists')) promiseArray.push(getUsersPlaylistTracks(session.token, session.userId));
-    if (include.includes('albums')) promiseArray.push(getUsersAlbumTracks(session.token));
-    if (include.includes('tracks')) promiseArray.push(getUsersSavedTracks(session.token));
     if (include.includes('new')) promiseArray.push(getNewReleaseTracks(session.token));
 
     const resolvedArray = await Promise.all(promiseArray);

@@ -8,9 +8,14 @@ export async function storePlaylists(playlists: any[], userId: string) {
 }
 
 export async function retrievePlaylists(userId: string) {
+
     const cachedDataString = await redis.get(`${userId}_allplaylists`);
     if (cachedDataString) return JSON.parse(cachedDataString);
     return undefined;
+}
+
+export async function invalidatePlaylistCache(userId: string) {
+    await redis.del(`${userId}_allplaylists`);
 }
 
 export async function storeTracks(type: TrackListType, trackData: Map<string, any>, userId?: string) {

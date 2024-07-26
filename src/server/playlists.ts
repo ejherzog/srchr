@@ -1,3 +1,4 @@
+import { invalidatePlaylistCache } from "../util/cache";
 import { Session } from "../util/types";
 import { getAuthRequest, postAuthRequest } from "./spotify";
 
@@ -71,6 +72,8 @@ export async function createNewPlaylist(requestBody: { playlistName: string, des
         // for each chunk of trackUris, add tracks to newly created playlist
         await addTracksToPlaylist(playlistId, chunk, session.token);
     }
+
+    await invalidatePlaylistCache(session.userId);
 
     // return playlistUrl
     return playlistResponse.external_urls.spotify;

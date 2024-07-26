@@ -12,8 +12,15 @@ Song Searcher sifts through a user's library (as well as popular Spotify playlis
 
 ---
 Built with:
+
 - TypeScript
 - ExpressJS
 - EmbeddedJS (ejs)
 - NodeJS
 - Redis
+
+---
+![Home Page](img/home.png)
+
+---
+![Duration Search Form](img/duration.png)

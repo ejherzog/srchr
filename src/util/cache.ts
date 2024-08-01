@@ -1,5 +1,5 @@
 import { Redis } from "ioredis";
-import { TrackListType, ONE_HOUR } from "./types";
+import { TrackListType, ONE_HOUR, Sources } from "./types";
 
 const redis: Redis = new Redis();
 
@@ -16,6 +16,18 @@ export async function retrievePlaylists(userId: string) {
 
 export async function invalidatePlaylistCache(userId: string) {
     await redis.del(`${userId}_allplaylists`);
+}
+
+export async function invalidateCache(userId: string) {
+
+    // build track list based on what user wants to include
+    var promiseArray: Promise<number>[] = [];
+    promiseArray.push(redis.del(`${userId}_allplaylists`));
+    promiseArray.push(redis.del(`${userId}_${Sources.albums.id}`));
+    promiseArray.push(redis.del(`${userId}_${Sources.playlists.id}`));
+    promiseArray.push(redis.del(`${userId}_${Sources.songs.id}`));
+
+    await Promise.all(promiseArray);
 }
 
 export async function storeTracks(type: TrackListType, trackData: Map<string, any>, userId?: string) {

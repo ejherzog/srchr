@@ -5,6 +5,7 @@ import { v4 as uuidv4, validate } from "uuid";
 import ky from "ky";
 import { getUserInfo } from "../server/spotify";
 import { SessionInfo, Session, Token, User } from "./types";
+import { invalidateCache } from "./cache";
 
 const redis: Redis = new Redis();
 
@@ -44,6 +45,8 @@ export async function userLogin(req: Request, res: Response) {
 }
 
 export async function userLogout(req: Request, res: Response) {
+    const sessionInfo = await getSessionInfo(req, res);
+    if (sessionInfo.session) await invalidateCache(sessionInfo.session!.userId);
     res.clearCookie(req.cookies['session-id']);
     await redis.del(req.cookies['session-id']);
 }

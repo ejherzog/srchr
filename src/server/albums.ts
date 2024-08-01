@@ -39,13 +39,14 @@ export async function getNewReleaseAlbumsArray(token: string) {
 
     const fullAlbumArray: any[] = [];
     allResponses.forEach(response => {
-        fullAlbumArray.push(...response['items']);
+        fullAlbumArray.push(...response['albums']['items']);
     });
 
     const albumHrefs: string[] = [];
-    fullAlbumArray.forEach(album => {
-        if (album.href) albumHrefs.push(album.href);
+    fullAlbumArray.forEach(item => {
+        if (item.album && item.album.tracks && item.album.tracks.href) albumHrefs.push(item.album.tracks.href);
     });
+    console.log(albumHrefs);
 
     return albumHrefs;
 }

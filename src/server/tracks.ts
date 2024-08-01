@@ -71,12 +71,12 @@ export async function getNewReleaseTracks(token: string): Promise<Map<string, an
     const cachedTrackMap = await retrieveTracks(Sources.new);
     if (cachedTrackMap) return cachedTrackMap;
 
-    const albumTracks = await getNewReleaseAlbumsArray(token);
+    const albumHrefs = await getNewReleaseAlbumsArray(token);
 
     const trackMap = new Map<string, any>();
     var latestResponse: any = {};
 
-    for (const albumLink of albumTracks) {
+    for (const albumLink of albumHrefs) {
         latestResponse = await getAuthRequest(albumLink, token);
         const trackArray: any[] = latestResponse['items'];
         trackArray.forEach(track => {

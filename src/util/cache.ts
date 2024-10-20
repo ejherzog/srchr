@@ -1,7 +1,18 @@
 import { Redis } from "ioredis";
-import { TrackListType, ONE_HOUR } from "./types";
+import { TrackListType, ONE_HOUR, Sources } from "./types";
 
 const redis: Redis = new Redis();
+
+export async function clearUsersCache(userId: string) {
+    
+    const deletePromises: Promise<any>[] = [];
+    Object.entries(Sources).forEach(type => {
+        const key = buildKey(type[1], userId);
+        deletePromises.push(redis.del(key));
+    });
+
+    await Promise.all(deletePromises);
+}
 
 export async function storePlaylists(playlists: any[], userId: string) {
     await redis.set(`${userId}_allplaylists`, JSON.stringify(playlists));

@@ -14,7 +14,7 @@ export async function getUserInfo(token: string): Promise<User> {
 export async function getUserPlaylists(session: Session) {
 
     const cachedPlaylists = await retrievePlaylists(session.userId);
-    if (cachedPlaylists) return cachedPlaylists;
+    if (cachedPlaylists && cachedPlaylists.size > 0) return cachedPlaylists;
 
     const responses: any[] = await getAllAuthRequest('https://api.spotify.com/v1/me/playlists', session.token);
 

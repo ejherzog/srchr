@@ -15,7 +15,7 @@ export class TrackListType {
 export const Sources = {
     playlists: new TrackListType('playlists', 'My Playlists', true),
     albums: new TrackListType('albums', 'My Saved Albums', true),
-    songs: new TrackListType('songs', 'My Saved Tracks (Liked Songs)', true),
+    tracks: new TrackListType('tracks', 'My Saved Tracks (Liked Songs)', true),
     popular: new TrackListType('popular', 'Popular Playlists'),
     new: new TrackListType('new', 'New Releases'),
 } as const;

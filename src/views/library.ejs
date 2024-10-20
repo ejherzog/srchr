@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+  <%- include('./partials/_head'); %>
+  <body>
+    <%- include('./partials/_nav'); %>
+    <div class="container mt-2">
+        <section class="mt-5 p-1">
+          <form action="/clearcache" method="POST">
+            <button type="submit" class="btn btn-success">Clear Cache</button>
+          </form>
+        </section>
+        <%- include('./partials/_footer'); %>
+    </div>
+  </body>
+</html>

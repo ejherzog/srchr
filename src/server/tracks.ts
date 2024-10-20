@@ -1,12 +1,18 @@
 import { retrieveTracks, storeTracks } from "../util/cache";
 import { Sources, Session } from "../util/types";
-import { getNewReleaseAlbumsArray, getUsersAlbumArray } from "./albums";
+import { getNewReleaseAlbumsArray } from "./albums";
 import { getFeaturedPlaylistsArray, getUsersPlaylistArray } from "./playlists";
 import { getAuthRequest } from "./spotify";
 
+export async function getSomeUserTracks(session: Session, count: number) {
+    var uri = `https://api.spotify.com/v1/me/tracks?limit=${count}`;
+    var response = await getAuthRequest(uri, session.token);
+    return response;
+}
+
 export async function getUsersSavedTracks(session: Session): Promise<Map<string, any>> {
 
-    const cachedTrackMap = await retrieveTracks(Sources.songs, session.userId);
+    const cachedTrackMap = await retrieveTracks(Sources.tracks, session.userId);
     if (cachedTrackMap && cachedTrackMap.size > 0) return cachedTrackMap;
 
     var allResponses: any[] = [];
@@ -33,7 +39,7 @@ export async function getUsersSavedTracks(session: Session): Promise<Map<string,
         }
     });
 
-    await storeTracks(Sources.songs, trackMap, session.userId);
+    await storeTracks(Sources.tracks, trackMap, session.userId);
     return trackMap;
 }
 
@@ -42,24 +48,38 @@ export async function getUsersAlbumTracks(session: Session): Promise<Map<string,
     const cachedTrackMap = await retrieveTracks(Sources.albums, session.userId);
     if (cachedTrackMap && cachedTrackMap.size > 0) return cachedTrackMap;
 
-    const albumTracks = await getUsersAlbumArray(session.token);
+    var allItems: any[] = [];
+    var latestResponse: any = {};
+    var uri = 'https://api.spotify.com/v1/me/albums?limit=50';
+
+    while (uri) {
+        latestResponse = await getAuthRequest(uri, session.token);
+        allItems.push(...latestResponse['items']);
+        uri = latestResponse.next;
+    }
+
+    const fullAlbumArray: any[] = [];
+    allItems.forEach(item => {
+        fullAlbumArray.push(item.album);
+    });
 
     const trackMap = new Map<string, any>();
-    var latestResponse: any = {};
 
-    for (const albumLink of albumTracks) {
-        latestResponse = await getAuthRequest(albumLink, session.token);
-        const trackArray: any[] = latestResponse['items'];
-        trackArray.forEach(track => {
-            if (track.id) {
-                var artists: string[] = [];
-                track.artists.forEach((artistObject: { name: string; }) => {
-                    artists.push(artistObject.name);
-                });
-                trackMap.set(track.uri, { duration_ms: track.duration_ms, 
-                    name: track.name, artists: artists.join(", ")});
-            }
-        });
+    for (const album of fullAlbumArray) {
+        if (album.tracks && album.tracks.items) {
+            const trackArray: any[] = album.tracks['items'];
+            const releaseYear = album.release_date.slice(0, 4);
+            trackArray.forEach(track => {
+                if (track.id) {
+                    var artists: string[] = [];
+                    track.artists.forEach((artistObject: { name: string; }) => {
+                        artists.push(artistObject.name);
+                    });
+                    trackMap.set(track.uri, { duration_ms: track.duration_ms, 
+                        name: track.name, artists: artists.join(", "), year: releaseYear });
+                }
+            });
+        }
     }
 
     await storeTracks(Sources.albums, trackMap, session.userId);

@@ -1,5 +1,5 @@
 import { Session } from "../util/types";
-import { getFeaturedPlaylistsTracks, getNewReleaseTracks, getUsersAlbumTracks, getUsersPlaylistTracks, getUsersSavedTracks } from "./tracks";
+import { getPopularPlaylistsTracks, getNewReleaseTracks, getUsersAlbumTracks, getUsersPlaylistTracks, getUsersSavedTracks } from "./tracks";
 import { getDisplayDuration } from "./utils";
 
 export async function durationSearch(session: Session, comparison: string,
@@ -16,7 +16,7 @@ export async function durationSearch(session: Session, comparison: string,
     allTracksMap.forEach((info, uri, trackMap) => {
         if (fitsDurationCriteria(info.duration_ms, comparison, duration, display)) {
             matches.push({ uri, name: info.name, artists: info.artists, 
-                duration: getDisplayDuration(info.duration_ms) });
+                duration: getDisplayDuration(info.duration_ms), year: info.year });
         }
     });
 
@@ -34,12 +34,29 @@ export async function titleSearch(session: Session, where: string, what: string,
     allTracksMap.forEach((info, uri, trackMap) => {
         if (matchesTitleCriteria(info.name, where, searchTerm)) {
             matches.push({ uri, name: info.name, artists: info.artists,
-                duration: getDisplayDuration(info.duration_ms )});
+                duration: getDisplayDuration(info.duration_ms), year: info.year });
         }
     });
 
     return matches.sort((a, b) => a.name.localeCompare(b.name));
 }
+
+export async function yearSearch(session: Session, include: string[], startYear: number, endYear?: number) {
+
+    const allTracksMap = await getTracksToInclude(include, session);
+    
+    var matches: any[] = [];
+
+    allTracksMap.forEach((info, uri) => {
+        if (matchesYearCriteria(info.year, startYear, endYear)) {
+            matches.push({ uri, name: info.name, artists: info.artists,
+                duration: getDisplayDuration(info.duration_ms), year: info.year });
+        }
+    });
+
+    return matches.sort((a, b) => a.name.localeCompare(b.name));
+}
+
 
 async function getTracksToInclude(include: string[], session: Session): Promise<Map<string, any>> {
 
@@ -49,7 +66,7 @@ async function getTracksToInclude(include: string[], session: Session): Promise<
     if (include.includes('albums')) promiseArray.push(getUsersAlbumTracks(session));
     if (include.includes('tracks')) promiseArray.push(getUsersSavedTracks(session));
 
-    if (include.includes('featured')) promiseArray.push(getFeaturedPlaylistsTracks(session.token));
+    if (include.includes('popular')) promiseArray.push(getPopularPlaylistsTracks(session.token));
     if (include.includes('new')) promiseArray.push(getNewReleaseTracks(session.token));
 
     const resolvedArray = await Promise.all(promiseArray);
@@ -89,4 +106,12 @@ function matchesTitleCriteria(trackTitle: string, where: string, searchTerm: str
         default:
             return trackTitle.toLowerCase().includes(searchTerm);
     }
+}
+
+function matchesYearCriteria(trackYear: number, startYear: number, endYear?: number) {
+
+    if (endYear) {
+        return trackYear <= endYear && trackYear >= startYear;
+    }
+    return trackYear === startYear;
 }

@@ -12,6 +12,7 @@
               <th>Name</th>
               <th>Artists</th>
               <th>Duration</th>
+              <th>Year</th>
             </tr>
             <% tracks.forEach(function(t) { %>
               <tr>
@@ -19,6 +20,7 @@
                 <td><%- t.name %></td>
                 <td><%- t.artists %></td>
                 <td><%- t.duration %></td>
+                <td><%- t.year %></td>
               </tr>
             <% }) %>
           </table>

@@ -2,7 +2,7 @@ import { retrieveTracks, storeTracks } from "../util/cache";
 import { Sources, Session } from "../util/types";
 import { severalAlbumsUri } from "./utils";
 import { getNewReleaseAlbumsArray } from "./albums";
-import { getFeaturedPlaylistsArray, getUsersPlaylistArray } from "./playlists";
+import { getPopularPlaylistsArray, getUsersPlaylistArray } from "./playlists";
 import { getAuthRequest } from "./spotify";
 
 export async function getSomeUserTracks(session: Session, count: number) {
@@ -137,12 +137,12 @@ export async function getUsersPlaylistTracks(session: Session, playlistHrefs?: s
     return await getTracksFromPlaylistLinks(session.token, playlistHrefs, session.userId);
 }
 
-export async function getFeaturedPlaylistsTracks(token: string, playlistHrefs: string[]): Promise<Map<string, any>>;
-export async function getFeaturedPlaylistsTracks(token: string): Promise<Map<string, any>>;
+export async function getPopularPlaylistsTracks(token: string, playlistHrefs: string[]): Promise<Map<string, any>>;
+export async function getPopularPlaylistsTracks(token: string): Promise<Map<string, any>>;
 
-export async function getFeaturedPlaylistsTracks(token: string, playlistHrefs?: string[]): Promise<Map<string, any>> {
+export async function getPopularPlaylistsTracks(token: string, playlistHrefs?: string[]): Promise<Map<string, any>> {
 
-    if (!playlistHrefs) playlistHrefs = await getFeaturedPlaylistsArray(token);
+    if (!playlistHrefs) playlistHrefs = await getPopularPlaylistsArray(token);
 
     return await getTracksFromPlaylistLinks(token, playlistHrefs);
 }
@@ -166,7 +166,7 @@ async function getTracksFromPlaylistLinks(token: string, playlistHrefs: string[]
                     artists.push(artistObject.name);
                 });
                 trackMap.set(item.track.uri, { duration_ms: item.track.duration_ms, 
-                    name: item.track.name, artists: artists.join(", ")});
+                    name: item.track.name, artists: artists.join(", "), year: item.track.album.release_date.slice(0, 4)});
             }
         });
     }

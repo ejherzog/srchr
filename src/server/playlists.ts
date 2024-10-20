@@ -8,6 +8,11 @@ export async function getSomeUserPlaylists(session: Session, count: number) {
     return response;
 }
 
+export async function onePlaylist(session: Session) {
+    var response = await getAuthRequest(`https://api.spotify.com/v1/playlists/33JCz7Vcc62KaGJt51JbMe/tracks`, session.token);
+    return response;
+}
+
 const CHUNK_SIZE = 50;
 
 export async function getUsersPlaylistArray(token: string) {
@@ -35,7 +40,7 @@ export async function getUsersPlaylistArray(token: string) {
     return playlistHrefs;
 }
 
-export async function getFeaturedPlaylistsArray(token: string) {
+export async function getPopularPlaylistsArray(token: string) {
 
     var allResponses: any[] = [];
     var latestResponse: any = {};

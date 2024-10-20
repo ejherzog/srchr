@@ -1,5 +1,6 @@
 import { retrieveTracks, storeTracks } from "../util/cache";
 import { Sources, Session } from "../util/types";
+import { severalAlbumsUri } from "./utils";
 import { getNewReleaseAlbumsArray } from "./albums";
 import { getFeaturedPlaylistsArray, getUsersPlaylistArray } from "./playlists";
 import { getAuthRequest } from "./spotify";
@@ -91,24 +92,33 @@ export async function getNewReleaseTracks(token: string): Promise<Map<string, an
     const cachedTrackMap = await retrieveTracks(Sources.new);
     if (cachedTrackMap && cachedTrackMap.size > 0) return cachedTrackMap;
 
-    const albumTracks = await getNewReleaseAlbumsArray(token);
+    const albumIds = await getNewReleaseAlbumsArray(token);
+    var latestResponse: any = {};
+    const albumArray: any[] = [];
+
+    while (albumIds.length) {
+        const uri = severalAlbumsUri(albumIds.splice(0, 20));
+        latestResponse = await getAuthRequest(uri, token);
+        albumArray.push(...latestResponse.albums);
+    }
 
     const trackMap = new Map<string, any>();
-    var latestResponse: any = {};
 
-    for (const albumLink of albumTracks) {
-        latestResponse = await getAuthRequest(albumLink, token);
-        const trackArray: any[] = latestResponse['items'];
-        trackArray.forEach(track => {
-            if (track.id) {
-                var artists: string[] = [];
-                track.artists.forEach((artistObject: { name: string; }) => {
-                    artists.push(artistObject.name);
-                });
-                trackMap.set(track.uri, { duration_ms: track.duration_ms, 
-                    name: track.name, artists: artists.join(", ")});
-            }
-        });
+    for (const album of albumArray) {
+        if (album.tracks && album.tracks.items) {
+            const trackArray: any[] = album.tracks['items'];
+            const releaseYear = album.release_date.slice(0, 4);
+            trackArray.forEach(track => {
+                if (track.id) {
+                    var artists: string[] = [];
+                    track.artists.forEach((artistObject: { name: string; }) => {
+                        artists.push(artistObject.name);
+                    });
+                    trackMap.set(track.uri, { duration_ms: track.duration_ms, 
+                        name: track.name, artists: artists.join(", "), year: releaseYear });
+                }
+            });
+        }
     }
 
     await storeTracks(Sources.new, trackMap);

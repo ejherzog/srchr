@@ -32,3 +32,9 @@ export function sortByTitle(playlists: any[]) {
 export function getDisplayDuration(duration_ms: number): string {
     return prettyMilliseconds( Math.round(duration_ms/1000) * 1000, { colonNotation: true, secondsDecimalDigits: 0 });
 }
+
+export function severalAlbumsUri(albumIds: string[]): string {
+
+    const idList = albumIds.join(",");
+    return `https://api.spotify.com/v1/albums?ids=${idList}`;
+}

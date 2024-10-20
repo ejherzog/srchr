@@ -7,36 +7,11 @@ export async function getSomeUserAlbums(session: Session, count: number) {
     return response;
 }
 
-// export async function getUsersAlbumArray(token: string) {
-
-//     var allResponses: any[] = [];
-//     var latestResponse: any = {};
-//     var uri = 'https://api.spotify.com/v1/me/albums';
-
-//     while (uri) {
-//         latestResponse = await getAuthRequest(uri, token);
-//         allResponses.push(latestResponse);
-//         uri = latestResponse.next;
-//     }
-
-//     const fullAlbumArray: any[] = [];
-//     allResponses.forEach(response => {
-//         fullAlbumArray.push(...response['items']);
-//     });
-
-//     const albumHrefs: string[] = [];
-//     fullAlbumArray.forEach(item => {
-//         if (item.album && item.album.tracks && item.album.tracks.href) albumHrefs.push(item.album.tracks.href);
-//     });
-
-//     return albumHrefs;
-// }
-
 export async function getNewReleaseAlbumsArray(token: string) {
 
     var allResponses: any[] = [];
     var latestResponse: any = {};
-    var uri = 'https://api.spotify.com/v1/browse/new-releases';
+    var uri = 'https://api.spotify.com/v1/browse/new-releases?limit=50';
 
     while (uri) {
         latestResponse = await getAuthRequest(uri, token);
@@ -46,13 +21,13 @@ export async function getNewReleaseAlbumsArray(token: string) {
 
     const fullAlbumArray: any[] = [];
     allResponses.forEach(response => {
-        fullAlbumArray.push(...response['items']);
+        fullAlbumArray.push(...response.albums.items);
     });
 
-    const albumHrefs: string[] = [];
+    const albumIds: string[] = [];
     fullAlbumArray.forEach(album => {
-        if (album.href) albumHrefs.push(album.href);
+        if (album.id) albumIds.push(album.id);
     });
 
-    return albumHrefs;
+    return albumIds;
 }

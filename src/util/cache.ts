@@ -6,8 +6,9 @@ const redis: Redis = new Redis();
 export async function clearUsersCache(userId: string) {
     
     const deletePromises: Promise<any>[] = [];
-    Object.entries(Sources).forEach(type => {
-        const key = buildKey(type[1], userId);
+    Object.entries(Sources).forEach(sourceEntry => {
+        const type: TrackListType = sourceEntry[1];
+        const key = type.personal ? buildKey(type, userId) : type.id;
         deletePromises.push(redis.del(key));
     });
 

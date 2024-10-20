@@ -42,6 +42,42 @@
         </section>
         <hr>
         <section class="mt-5 p-1">
+          <h4>Search By Release Year</h4>
+          <p><i>Search for song by the year of the album's release date.</i></p>
+          <form action="/year" method="POST">
+              <div class="row g-3 align-items-center">
+                  <div class="col-auto">
+                    <label for="start" class="col-form-label">From</label>
+                  </div>
+                  <div class="col-auto">
+                    <input type="number" id="start" name="start" class="form-control" aria-describedby="searchTermHelpInline">
+                  </div>
+                  <div class="col-auto">
+                    <span id="searchTermHelpInline" class="form-text">
+                      <i>Must be a 4-digit year.</i>
+                    </span>
+                  </div>
+                </div>
+                <div class="row g-3 align-items-center">
+                  <div class="col-auto">
+                    <label for="end" class="col-form-label">To</label>
+                  </div>
+                  <div class="col-auto">
+                    <input type="number" id="end" name="end" class="form-control" aria-describedby="searchTermHelpInline">
+                  </div>
+                  <div class="col-auto">
+                    <span id="searchTermHelpInline" class="form-text">
+                      <i>Must be a 4-digit year.</i>
+                    </span>
+                  </div>
+                </div>
+                <%- include('./partials/_include'); %>
+                  <br>
+              <button type="submit" class="btn btn-success">Search</button>
+          </form>
+      </section>
+        <hr>
+        <section class="mt-5 p-1">
             <h4>Search By Duration</h4>
             <p><i>Search for songs that are more than, less than, or equal to a specified amount of time.</i></p>
             <form action="/duration" method="POST">

@@ -2,12 +2,6 @@ import { invalidatePlaylistCache } from "../util/cache";
 import { Session } from "../util/types";
 import { getAuthRequest, postAuthRequest } from "./spotify";
 
-export async function getSomeUserPlaylists(session: Session, count: number) {
-    var uri = `https://api.spotify.com/v1/me/playlists?limit=${count}`;
-    var response = await getAuthRequest(uri, session.token);
-    return response;
-}
-
 const CHUNK_SIZE = 50;
 
 export async function getUsersPlaylistArray(token: string) {
@@ -35,7 +29,7 @@ export async function getUsersPlaylistArray(token: string) {
     return playlistHrefs;
 }
 
-export async function getFeaturedPlaylistsArray(token: string) {
+export async function getPopularPlaylistsArray(token: string) {
 
     var allResponses: any[] = [];
     var latestResponse: any = {};

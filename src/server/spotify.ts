@@ -36,7 +36,7 @@ export async function getUserPlaylists(session: Session) {
     return playlists;
 }
 
-export async function getFeaturedPlaylistTracks(token: string) {
+export async function getPopularPlaylistTracks(token: string) {
 
     var allResponses: any[] = [];
     var response: any = {};

@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 import cookieParser from "cookie-parser";
 import { authenticate, getSessionInfo, userLogin, userLogout } from "./util/session";
 import { clearUsersCache } from "./util/cache";
-import { durationSearch, titleSearch } from "./server/search";
+import { durationSearch, titleSearch, yearSearch} from "./server/search";
 import { createNewPlaylist } from "./server/playlists";
 import { Sources } from "./util/types";
 
@@ -17,8 +17,8 @@ const app: Express = express();
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 1000000 }));
 app.use(cors());
 app.use(cookieParser());
 
@@ -90,6 +90,20 @@ app.post('/duration', async (req: Request, res: Response) => {
     const tracks = await durationSearch(sessionInfo.session!, 
         req.body.comparison, req.body.include, req.body.min, req.body.sec);
     
+    res.render('results', {
+        ...sessionInfo.displayData,
+        tracks: tracks
+    });
+});
+
+app.post('/year', async (req: Request, res: Response) => {
+    const sessionInfo = await getSessionInfo(req, res);
+    if (!sessionInfo.isLoggedIn) res.redirect('/');
+
+    const endYear = req.body.start === req.body.end ? undefined : req.body.end;
+    const tracks = await yearSearch(sessionInfo.session!,
+        req.body.include, req.body.start, endYear);
+   
     res.render('results', {
         ...sessionInfo.displayData,
         tracks: tracks

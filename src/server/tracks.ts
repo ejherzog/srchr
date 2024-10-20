@@ -7,7 +7,7 @@ import { getAuthRequest } from "./spotify";
 export async function getUsersSavedTracks(session: Session): Promise<Map<string, any>> {
 
     const cachedTrackMap = await retrieveTracks(Sources.songs, session.userId);
-    if (cachedTrackMap) return cachedTrackMap;
+    if (cachedTrackMap && cachedTrackMap.size > 0) return cachedTrackMap;
 
     var allResponses: any[] = [];
     var latestResponse: any = {};
@@ -40,7 +40,7 @@ export async function getUsersSavedTracks(session: Session): Promise<Map<string,
 export async function getUsersAlbumTracks(session: Session): Promise<Map<string, any>> {
 
     const cachedTrackMap = await retrieveTracks(Sources.albums, session.userId);
-    if (cachedTrackMap) return cachedTrackMap;
+    if (cachedTrackMap && cachedTrackMap.size > 0) return cachedTrackMap;
 
     const albumTracks = await getUsersAlbumArray(session.token);
 
@@ -69,7 +69,7 @@ export async function getUsersAlbumTracks(session: Session): Promise<Map<string,
 export async function getNewReleaseTracks(token: string): Promise<Map<string, any>> {
 
     const cachedTrackMap = await retrieveTracks(Sources.new);
-    if (cachedTrackMap) return cachedTrackMap;
+    if (cachedTrackMap && cachedTrackMap.size > 0) return cachedTrackMap;
 
     const albumTracks = await getNewReleaseAlbumsArray(token);
 
@@ -121,7 +121,7 @@ async function getTracksFromPlaylistLinks(token: string, playlistHrefs: string[]
 
     const type = userId ? Sources.playlists : Sources.popular;
     const cachedTrackMap = await retrieveTracks(type, userId);
-    if (cachedTrackMap) return cachedTrackMap;
+    if (cachedTrackMap && cachedTrackMap.size > 0) return cachedTrackMap;
 
     const trackMap = new Map<string, any>();
     var latestResponse: any = {};

@@ -39,7 +39,7 @@ export async function userLogin(req: Request, res: Response) {
             state: state
         }));
     } else {
-        res.redirect('/playlists');
+        res.redirect('/library');
     }
 }
 
@@ -56,7 +56,7 @@ export async function authenticate(req: Request, res: Response) {
         const accessToken = await getAccessToken(code);
 
         await createSession(res, accessToken);
-        res.redirect('/playlists');
+        res.redirect('/library');
     } else {
         res.redirect('/about');
     }

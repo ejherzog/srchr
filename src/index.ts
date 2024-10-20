@@ -7,7 +7,7 @@ import cookieParser from "cookie-parser";
 import { authenticate, getSessionInfo, userLogin, userLogout } from "./util/session";
 import { clearUsersCache } from "./util/cache";
 import { durationSearch, titleSearch, yearSearch} from "./server/search";
-import { createNewPlaylist, onePlaylist } from "./server/playlists";
+import { createNewPlaylist } from "./server/playlists";
 import { Sources } from "./util/types";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -45,8 +45,7 @@ app.get('/library', async (req: Request, res: Response) => {
     if (!sessionInfo.isLoggedIn) res.redirect('/');
 
     res.render('library', {
-        ...sessionInfo.displayData,
-        getPlaylistData: await onePlaylist(sessionInfo.session!)
+        ...sessionInfo.displayData
     });
 });
 
@@ -67,8 +66,7 @@ app.post('/clearcache', async (req: Request, res: Response) => {
     await clearUsersCache(sessionInfo.session!.userId);
 
     res.render('library', {
-        ...sessionInfo.displayData,
-        getPlaylistData: await onePlaylist(sessionInfo.session!)
+        ...sessionInfo.displayData
     });
 });
 

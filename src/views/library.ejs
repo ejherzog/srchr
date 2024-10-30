@@ -1,16 +1,36 @@
 <!doctype html>
 <html lang="en" data-bs-theme="dark">
-  <%- include('./partials/_head'); %>
+<%- include('./partials/_head'); %>
+
   <body>
     <%- include('./partials/_nav'); %>
-    <div class="container mt-2">
-        <section class="mt-5 p-1">
-          <form action="/clearcache" method="POST">
-            <button type="submit" class="btn btn-success">Clear Cache</button>
+      <div class="container mt-2">
+        <section class="my-3 p-1">
+        <h4>Your Spotify Library</h4>
+        <hr>
+        <p>We recommend loading your Spotify library data first and then starting your search(es). We store your library
+          data in a cache for up to 1 hour.</p>
+        <p>By default, we load your Liked Songs, all your playlists (public and private), and your Saved Albums.</p>
+        <p>You can also choose to include Spotify's currently featured playlists as well as Spotify's new releases list.
+        </p>
+          <form action="/loadlibrary" method="POST">
+            <button type="submit" class="btn btn-success">Load Your Library</button>
           </form>
         </section>
         <hr>
+        <section class="my-3 p-1">
+        <p>If you create a new playlist, like a new song, or save a new album to your library while using this tool, we
+          will not automatically fetch that updated information.</p>
+        <p>If want us to retrieve the latest data from your Spotify library, click Clear Cache and then Load Your
+          Library.</p>
+        <p>Our cache deletes your data after 1 hour, but you can use this Clear Cache button to immediately delete your
+          data from our system.</p>
+          <form action="/clearcache" method="POST">
+            <button type="submit" class="btn btn-danger">Clear Cache</button>
+          </form>
+        </section>
         <%- include('./partials/_footer'); %>
-    </div>
+      </div>
   </body>
+
 </html>

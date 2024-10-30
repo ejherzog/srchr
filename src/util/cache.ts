@@ -1,7 +1,29 @@
 import { Redis } from "ioredis";
-import { TrackListType, ONE_HOUR, Sources } from "./types";
+import { TrackListType, ONE_HOUR, Sources, Session } from "./types";
+import { getUsersPlaylistTracks, getUsersAlbumTracks, getUsersSavedTracks, getPopularPlaylistsTracks, getNewReleaseTracks } from "../server/tracks";
 
 const redis: Redis = new Redis();
+
+export async function loadLibrary(session: Session): Promise<any[]> {
+
+    var promiseArray: Promise<Map<string, any>>[] = [];
+    promiseArray.push(getUsersPlaylistTracks(session));
+    promiseArray.push(getUsersAlbumTracks(session));
+    promiseArray.push(getUsersSavedTracks(session));
+
+    promiseArray.push(getPopularPlaylistsTracks(session.token));
+    promiseArray.push(getNewReleaseTracks(session.token));
+
+    const resolvedArray = await Promise.all(promiseArray);
+    var trackMapArray: Map<string, any>[] = [];
+    resolvedArray.forEach(result => {
+        trackMapArray.push(result);
+    });
+
+    // merge all the track maps together
+    const allTracksArray = trackMapArray.flatMap(m => [...m]);
+    return allTracksArray;
+}
 
 export async function clearUsersCache(userId: string) {
     

@@ -5,7 +5,7 @@ import bodyParser from "body-parser";
 import { fileURLToPath } from 'url';
 import cookieParser from "cookie-parser";
 import { authenticate, getSessionInfo, userLogin, userLogout } from "./util/session";
-import { clearUsersCache } from "./util/cache";
+import { clearUsersCache, loadLibrary } from "./util/cache";
 import { durationSearch, titleSearch, yearSearch} from "./server/search";
 import { createNewPlaylist } from "./server/playlists";
 import { Sources } from "./util/types";
@@ -45,7 +45,8 @@ app.get('/library', async (req: Request, res: Response) => {
     if (!sessionInfo.isLoggedIn) res.redirect('/');
 
     res.render('library', {
-        ...sessionInfo.displayData
+        ...sessionInfo.displayData,
+        libraryData: undefined
     });
 });
 
@@ -59,6 +60,18 @@ app.get('/search', async (req: Request, res: Response) => {
     });
 });
 
+app.post('/loadlibrary', async (req: Request, res: Response) => {
+    const sessionInfo = await getSessionInfo(req, res);
+    if (!sessionInfo.isLoggedIn) res.redirect('/');
+
+    const libraryData = await loadLibrary(sessionInfo.session!);
+
+    res.render('library', {
+        ...sessionInfo.displayData,
+        libraryData
+    });
+});
+
 app.post('/clearcache', async (req: Request, res: Response) => {
     const sessionInfo = await getSessionInfo(req, res);
     if (!sessionInfo.isLoggedIn) res.redirect('/');
@@ -66,7 +79,8 @@ app.post('/clearcache', async (req: Request, res: Response) => {
     await clearUsersCache(sessionInfo.session!.userId);
 
     res.render('library', {
-        ...sessionInfo.displayData
+        ...sessionInfo.displayData,
+        libraryData: undefined
     });
 });
 
